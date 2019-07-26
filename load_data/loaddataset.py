@@ -1,10 +1,10 @@
 """
 实现数据集的加载
 """
-import numpy as np
-import matplotlib.pyplot as plt
 import pickle as pk
 import os
+from config import config as cfg
+
 
 class DataSetOp(object):
     """
@@ -46,9 +46,29 @@ class DataSetOp(object):
                 label_name = batch['label_names']
         return train_data, train_label, test_data, label_name
 
+    def load_cifar_10_single_data(self, data_type):
+        """
+        获取单个批次文件的训练数据
+        :param data_type: 批次文件名称
+        :return: 单个批次的训练数据、标签数据
+        """
+        # 定义训练数据、标签
+        train_data = []
+        label_data = []
+        # 文件路径
+        file_path = os.path.join(self.data_path, data_type)
+        # 使用上下文环境打开文件
+        with open(file_path, mode='rb') as file:
+            batch_file = pk.load(file, encoding='latin1')
+        # 将获取的训练数据进行转化
+        train_data = batch_file['data'].reshape(len(batch_file['data']), 3, 32, 32).transpose(0, 3, 2, 1)
+        label_data = batch_file['labels']
+        return train_data, label_data
+
 
 if __name__ == '__main__':
-    cfiar = DataSetOp(data_path='/home/xiaonan/Dataset/cifar-10/')
+
+    cfiar = DataSetOp(data_path=cfg.Config().data_path)
     train_data, train_label, test_data, label_name = cfiar.load_cifar_10_data()
     print(train_data[0].shape)
     print(train_label[0])
