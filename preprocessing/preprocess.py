@@ -13,10 +13,12 @@ cifar = cifar.DataSetOp(cfg.data_path)
 
 class Preprocess(object):
     def __init__(self):
-        self.data = None  # 处理的数据
-        self.save_train_path = cfg.prepro_train_path  # 保存训练集预处理后的文件路径
-        self.save_valida_path = cfg.prepro_valid_path  # 保存验证集预处理后的文件路径
-        self.data_path = cfg.data_path  # 数据集路径
+        # 保存训练集、验证集、测试集预处理后的文件路径
+        self.save_train_path = cfg.prepro_train_path
+        self.save_valida_path = cfg.prepro_valid_path
+        self.save_test_path = cfg.prepro_test_path
+        # 数据集路径
+        self.data_path = cfg.data_path
 
     def normalize(self, data):
         """
@@ -37,12 +39,16 @@ class Preprocess(object):
         :param data: 数据
         :return: 编码后的标签矩阵，（标签数量，类别数（one-hot向量））
         """
-        encoded_label = np.zeros((len(data), 10))  # 初始化相应数量的one-hot向量（每一行全为0）
-        for index, value in enumerate(data):
-            encoded_label[index][value] = 1  # 设置每个类的one-hot向量的值（特定类别位置为1）
+        try:
+            encoded_label = np.zeros((len(data), 10))  # 初始化相应数量的one-hot向量（每一行全为0）
+            for index, value in enumerate(data):
+                encoded_label[index][value] = 1  # 设置每个类的one-hot向量的值（特定类别位置为1）
+        except ValueError:
+            print('标签是：{}'.format(data))
+            return None
         return encoded_label
 
-    def _preprocess_and_save_data(self, features_data, labels_data, save_file_path):
+    def _preprocess_and_save_data(self, features_data, save_file_path, labels_data=None):
         """
         归一化训练特征数据、对标签数据进行one-hot编码，并将预处理后的数据进行保存。
         :param features_data: 训练的特征数据
@@ -58,7 +64,10 @@ class Preprocess(object):
         if os.path.isfile(save_file_path) is False:
             # 打开不存在的文件
             with open(save_file_path, mode='wb') as save_file:
-                pk.dump((features_data, labels_data), save_file)
+                if labels_data is None:  # 若标签是None，则保存的是测试集
+                    pk.dump(features_data, save_file)
+                else:  # 保存训练、验证集
+                    pk.dump((features_data, labels_data), save_file)
 
     def preprocess_and_save_data(self):
         """
@@ -78,17 +87,23 @@ class Preprocess(object):
             # 单个批次中预处理90%的数据
             # 分别进行特征数据的归一化、标签的one-hot向量的编码，保存为一个新文件
             self._preprocess_and_save_data(train_data[:-valid_len],
-                                           train_labels[:-valid_len],
-                                           self.save_train_path+'preprocess_batch_'+str(i+1)+'.p')
+                                           self.save_train_path + 'preprocess_batch_' + str(i + 1) + '.p',
+                                           train_labels[:-valid_len])
             # 不像训练集，验证集需要从每个训练集批次中选取10%一起组合成验证集
             valid_data.extend(train_data[-valid_len:])
             valid_labels.extend(train_labels[-valid_len:])
             print(np.array(valid_data).shape, np.array(valid_labels).shape)
 
-            # 对验证集进行预处理
+            # 对验证集进行预处理并保存
             self._preprocess_and_save_data(np.array(valid_data),
-                                           np.array(valid_labels),
-                                           self.save_valida_path+'preprocess_validation.p')
+                                           self.save_valida_path+'preprocess_validation.p',
+                                           np.array(valid_labels),)
+
+        # 获取测试集数据
+        test_data = cifar.load_cifar_10_single_data(data_type=cfg.data_type[5])
+        # 对测试集数据进行预处理并保存
+        self._preprocess_and_save_data(test_data,
+                                       self.save_test_path+'preprocess_test.p')
 
 
 if __name__ == '__main__':

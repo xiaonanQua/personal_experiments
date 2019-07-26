@@ -26,6 +26,7 @@ class DataSetOp(object):
         train_label = []
         test_data = []
         label_name = []
+
         # 打开数据集文件
         for i in range(len(data_type)):
             file_path = os.path.join(self.data_path, data_type[i])  # 数据文件路径
@@ -44,6 +45,7 @@ class DataSetOp(object):
                 test_data = batch['data'].reshape(len(batch['data']), 3, 32, 32).transpose(0, 3, 2, 1)
             else:
                 label_name = batch['label_names']
+
         return train_data, train_label, test_data, label_name
 
     def load_cifar_10_single_data(self, data_type):
@@ -55,6 +57,7 @@ class DataSetOp(object):
         # 定义训练数据、标签
         train_data = []
         label_data = []
+
         # 文件路径
         file_path = os.path.join(self.data_path, data_type)
         # 使用上下文环境打开文件
@@ -63,8 +66,16 @@ class DataSetOp(object):
         # 将获取的训练数据进行转化
         train_data = batch_file['data'].reshape(len(batch_file['data']), 3, 32, 32).transpose(0, 3, 2, 1)
         label_data = batch_file['labels']
+
         return train_data, label_data
 
+    def load_preprocess_data(self, data_type):
+        """
+        加载预处理后的数据，包括训练集、验证集、测试集
+        :param data_type: 加载的数据类型
+        :return:
+        """
+        pass
 
 if __name__ == '__main__':
 
