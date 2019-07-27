@@ -69,13 +69,22 @@ class DataSetOp(object):
 
         return train_data, label_data
 
-    def load_preprocess_data(self, data_type):
+    def load_preprocess_data(self, data_path, data_name, batch_size):
         """
         加载预处理后的数据，包括训练集、验证集、测试集
-        :param data_type: 加载的数据类型
+        :param data_path: 数据路径
+        :param data_name: 数据文件名称
         :return:
         """
-        pass
+        file_path = os.path.join(data_path, data_name)
+        if os.path.isfile(file_path) is False:
+            print('{}:不存在'.format(file_path))
+            return None
+        with open(file_path, 'rb') as file:
+            batch = pk.load(file, encoding='latin1')
+        return batch
+
+
 
 if __name__ == '__main__':
 

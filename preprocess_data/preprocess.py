@@ -43,7 +43,7 @@ class Preprocess(object):
             encoded_label = np.zeros((len(data), 10))  # 初始化相应数量的one-hot向量（每一行全为0）
             for index, value in enumerate(data):
                 encoded_label[index][value] = 1  # 设置每个类的one-hot向量的值（特定类别位置为1）
-        except ValueError:
+        except TypeError:
             print('标签是：{}'.format(data))
             return None
         return encoded_label
@@ -100,7 +100,8 @@ class Preprocess(object):
                                            np.array(valid_labels),)
 
         # 获取测试集数据
-        test_data = cifar.load_cifar_10_single_data(data_type=cfg.data_type[5])
+        test_data, _ = cifar.load_cifar_10_single_data(data_type=cfg.data_type[5])
+        print(test_data.shape)
         # 对测试集数据进行预处理并保存
         self._preprocess_and_save_data(test_data,
                                        self.save_test_path+'preprocess_test.p')
