@@ -4,6 +4,7 @@
 import pickle as pk
 import os
 import numpy as np
+import matplotlib.pyplot as plt
 from config import config as cfg
 
 
@@ -70,12 +71,13 @@ class DataSetOp(object):
 
         return train_data, label_data
 
-    def load_preprocess_data(self, data_path, data_name, batch_size=None):
+    def load_preprocess_data(self, data_path, data_name, batch_size=None, index=None):
         """
         加载预处理后的数据，包括训练集、验证集、测试集
         :param data_path: 数据路径
         :param data_name: 数据文件名称
         :param batch_size: 随机批次大小，每次进行数据的加载，即随机选取batch_size数量的样本
+        :param index: 索引位置
         :return:
         """
         train_data = []  # 定义训练数据
@@ -91,15 +93,19 @@ class DataSetOp(object):
             # 编码形式是'latin1',使得读出的数据为data形式，用于numpy使用
             batch = pk.load(file, encoding='latin1')
         if batch_size is not None:  # 处理训练数据
+            # 洗牌读取数据的索引
+            index_list = np.array(range(index*batch_size, (index+1)*batch_size))
+            np.random.shuffle(index_list)
             # 随机抽取batch_size数量的训练数据并进行封装
-            for i in range(batch_size):
-                # 在0-len(batch[0])范围内随机一个索引
-                index = np.random.randint(low=0, high=len(batch[0]))
+            for i in index_list:
                 # 将数据附加在训练数据中
-                train_data.append(batch[0][index])
-                label_data.append(batch[1][index])
-            # print(np.array(train_data).shape, np.array(label_data).shape)
-            return np.array(train_data), np.array(label_data)
+                train_data.append(batch[0][i])
+                label_data.append(batch[1][i])
+            # 将list数据转化成数组
+            train_data = np.array(train_data)
+            label_data = np.array(label_data)
+
+            return train_data, label_data
 
         return batch
 
@@ -107,10 +113,21 @@ class DataSetOp(object):
 if __name__ == '__main__':
 
     cfiar = DataSetOp(data_path=cfg.Config().data_path)
-    train_data, train_label, test_data, label_name = cfiar.load_cifar_10_data()
-    print(train_data[0].shape)
-    print(train_label[0])
-    print(test_data.shape)
-    print(label_name)
+    # train_data, train_label, test_data, label_name = cfiar.load_cifar_10_data()
+    # print(train_data[0].shape)
+    # print(train_label[0])
+    # print(test_data.shape)
+    # print(label_name)
+    # cfg = cfg.Config()
+    # train_data, train_label = cfiar.load_preprocess_data(cfg.prepro_train_path, 'preprocess_batch_1.p', batch_size=1)
+    # cfiar_data, cfiar_label = cfiar.load_cifar_10_single_data('data_batch_1')
+    # print(train_data[0])
+    # print(cfiar_data[0])
+    # #plt.imshow(cfiar_data[0])
+    # plt.imshow(train_data[0])
+    # plt.show()
+    index = set()
+    while len(index) != 128:
+        index.add(np.random.shuffle())
 
 

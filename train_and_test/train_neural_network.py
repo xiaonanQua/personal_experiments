@@ -59,21 +59,24 @@ class TrainNeuralNetwork(object):
         进行神经网络的训练
         :return:
         """
-        index = 0
         # 开启会话进行训练
         with tf.Session() as sess:
             # 初始化全局变量
             tf.global_variables_initializer().run()
             valid_data = cifar.load_preprocess_data(self.prepro_valid_path, 'preprocess_validation.p')
-
+            j = 0
             # 训练循环
             for epoch in range(self.epochs):
                 # 循环所有批次
                 for i in range(1, 6):
+
                     data_name = 'preprocess_batch_{}.p'.format(i)
                     batch_data = cifar.load_preprocess_data(self.prepro_train_path,
                                                             data_name,
-                                                            batch_size=self.batch_size)
+                                                            batch_size=self.batch_size,
+                                                            index=j)
+                    if i % 5 == 0:
+                        j = j + 1
                     features, labels = batch_data
                     sess.run(self.optimizer, feed_dict={self.x: features,
                                                         self.y: labels,

@@ -20,7 +20,7 @@ class Preprocess(object):
         # 数据集路径
         self.data_path = cfg.data_path
 
-    def normalize(self, data):
+    def _normalize(self, data):
         """
         使用min-max归一化技术将原始图像数据转化0-1的范围内
         :param data:输入的图像数据，(32,32,3)形状的numpy数组形式
@@ -33,7 +33,7 @@ class Preprocess(object):
         data = (data-min_value)/(max_value-min_value)
         return data
 
-    def one_hot_encode(self, data):
+    def _one_hot_encode(self, data):
         """
         使用one-hot编码将每个图像的类别标签变成one-hot向量
         :param data: 数据
@@ -43,7 +43,7 @@ class Preprocess(object):
             encoded_label = np.zeros((len(data), 10))  # 初始化相应数量的one-hot向量（每一行全为0）
             for index, value in enumerate(data):
                 encoded_label[index][value] = 1  # 设置每个类的one-hot向量的值（特定类别位置为1）
-        except TypeError:
+        except TypeError:  # 捕捉数据为None的时候
             print('标签是：{}'.format(data))
             return None
         return encoded_label
@@ -57,8 +57,8 @@ class Preprocess(object):
         :return:
         """
         # 进行归一化和one-hot编码
-        features_data = self.normalize(features_data)
-        labels_data = self.one_hot_encode(labels_data)
+        features_data = self._normalize(features_data)
+        labels_data = self._one_hot_encode(labels_data)
         print(save_file_path)
         # 使用pickle进行数据的保存
         if os.path.isfile(save_file_path) is False:
