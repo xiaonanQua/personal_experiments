@@ -103,7 +103,6 @@ class TrainNeuralNetwork(object):
 
                     print('valid_acc:{:.6f}'.format(valid_acc))
 
-
             # 保存模型
             saver = tf.train.Saver()
             saver.save(sess, cfg.train_model_path)
