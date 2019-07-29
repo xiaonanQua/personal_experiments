@@ -52,9 +52,10 @@ class TrainNeuralNetwork(object):
         self.model = tf.identity(logits, name='logits')  # 用于训练结束后加载训练模型
 
         # 初始化损失函数、优化器、准确率
-        self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=self.y))
-        self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
+        self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits, labels=self.y))
+        self.optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
         correct_pred = tf.equal(tf.argmax(logits, 1), tf.argmax(self.y, 1))
+        print(correct_pred)
         self.accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32), name='accuracy')
 
     def train_nerual_network(self):
@@ -63,41 +64,45 @@ class TrainNeuralNetwork(object):
         :return:
         """
         # 开启会话进行训练
-        with tf.Session() as sess:
+        with tf.compat.v1.Session() as sess:
             # 初始化全局变量
-            tf.global_variables_initializer().run()
+            tf.compat.v1.global_variables_initializer().run()
             valid_data = cifar.load_preprocess_data(self.prepro_valid_path, 'preprocess_validation.p')
             index = 0
             # 训练循环
             for epoch in range(self.epochs):
-                # 循环所有批次
-                for i in range(1, 6):
-                    # 加载批次数据
-                    data_name = 'preprocess_batch_{}.p'.format(i)
-                    batch_data = cifar.load_preprocess_data(self.prepro_train_path,
-                                                            data_name,
-                                                            batch_size=self.batch_size,
-                                                            index=index)
-                    # 处理索引值
-                    if i % 5 == 0:
-                        index = index + 1
-                    if index >= int(9000/self.batch_size):
-                        index = 0
+                # 循环,1epoch = 训练样本数量/批次样本数量
+                for j in range(1, int(45000/self.batch_size) + 1):
+                    for i in range(1, 6):
+                        # 加载批次数据
+                        data_name = 'preprocess_batch_{}.p'.format(i)
+                        batch_data = cifar.load_preprocess_data(self.prepro_train_path,
+                                                                data_name,
+                                                                batch_size=self.batch_size,
+                                                                index=index)
+                        # 处理索引值
+                        if i % 5 == 0:
+                            index = index + 1
+                        if index >= int(9000 / self.batch_size):
+                            index = 0
 
-                    # 获取批次中的特征、标签数据
-                    features, labels = batch_data
-                    sess.run(self.optimizer, feed_dict={self.x: features,
-                                                        self.y: labels,
-                                                        self.keep_prob: cfg.hyperparam['keep_prob']})
+                        # 获取批次中的特征、标签数据
+                        features, labels = batch_data
+                        sess.run(self.optimizer, feed_dict={self.x: features,
+                                                            self.y: labels,
+                                                            self.keep_prob: cfg.hyperparam['keep_prob']})
 
-                    loss = sess.run(self.loss, feed_dict={self.x: features,
-                                                          self.y: labels,
-                                                          self.keep_prob: 1})
+                        loss = sess.run(self.loss, feed_dict={self.x: features,
+                                                              self.y: labels,
+                                                              self.keep_prob: 1})
+                        print('Epoch:{}, CIFAR-10_Batch_{}, '.format(epoch + 1, i), end='')
+                        print('loss{:10.4f}'.format(loss))
                     valid_acc = sess.run(self.accuracy, feed_dict={self.x: valid_data[0],
                                                                    self.y: valid_data[1],
                                                                    self.keep_prob: 1})
-                    print('Epoch:{}, CIFAR-10_Batch_{}, '.format(epoch+1, i), end='')
-                    print('loss:{:>10.4f}, valid_acc:{:.6f}'.format(loss, valid_acc))
+
+                    print('valid_acc:{:.6f}'.format(valid_acc))
+
 
             # 保存模型
             saver = tf.train.Saver()

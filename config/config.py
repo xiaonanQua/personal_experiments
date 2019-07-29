@@ -22,7 +22,7 @@ class Config(object):
         self.train_model_path = self.save_data_path + 'train_model/'
 
         # 实验的超参数配置
-        self.hyperparam = {'epochs': 10000, 'batch_size': 128, 'keep_prob': 0.7, 'learning_rate': 0.001}
+        self.hyperparam = {'epochs': 10, 'batch_size': 2048, 'keep_prob': 0.7, 'learning_rate': 0.001}
 
         # 初始化文件夹
         self.init_dir()

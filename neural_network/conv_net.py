@@ -36,56 +36,56 @@ class ConvNet(object):
         conv1 = tf.nn.relu(conv1)
         # 对卷积后的值进行最大池化进行降维，核尺寸是2*2，步长为1*1，进行0填充
         conv1_pool = tf.nn.max_pool2d(conv1, ksize=[1, 2, 2, 1], strides=[1, 1, 1, 1], padding='SAME')
-        conv1_bn = tf.layers.batch_normalization(conv1_pool)
+        # conv1_bn = tf.layers.batch_normalization(conv1_pool)
 
         # 卷积层2
-        conv2 = tf.nn.conv2d(conv1_bn, conv2_filter, strides=[1, 1, 1, 1], padding='SAME')
+        conv2 = tf.nn.conv2d(conv1_pool, conv2_filter, strides=[1, 1, 1, 1], padding='SAME')
         conv2 = tf.nn.relu(conv2)
         conv2_pool = tf.nn.max_pool2d(conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-        conv2_bn = tf.layers.batch_normalization(conv2_pool)
+        # conv2_bn = tf.layers.batch_normalization(conv2_pool)
 
         # 卷积层3
-        conv3 = tf.nn.conv2d(conv2_bn, conv3_filter, strides=[1, 1, 1, 1], padding='SAME')
+        conv3 = tf.nn.conv2d(conv2_pool, conv3_filter, strides=[1, 1, 1, 1], padding='SAME')
         conv3 = tf.nn.relu(conv3)
         conv3_pool = tf.nn.max_pool2d(conv3, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-        conv3_bn = tf.layers.batch_normalization(conv3_pool)
+        # conv3_bn = tf.layers.batch_normalization(conv3_pool)
 
         # 卷积层4
-        conv4 = tf.nn.conv2d(conv3_bn, conv4_filter, strides=[1, 1, 1, 1], padding='SAME')
+        conv4 = tf.nn.conv2d(conv3_pool, conv4_filter, strides=[1, 1, 1, 1], padding='SAME')
         conv4 = tf.nn.relu(conv4)
         conv4_pool = tf.nn.max_pool2d(conv4, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-        conv4_bn = tf.compat.v1.layers.batch_normalization(conv4_pool)
+        # conv4_bn = tf.compat.v1.layers.batch_normalization(conv4_pool)
 
         # 将经过卷积层卷积后的数据展平为行向量
-        flat = tf.compat.v1.layers.Flatten()(conv4_bn)
+        flat = tf.compat.v1.layers.Flatten()(conv4_pool)
 
         # 全连接层1
         fc1_weights = tf.Variable(tf.random.truncated_normal([8192, 128], dtype=tf.float32, stddev=0.08))
         fc1_bias = tf.Variable(tf.constant(0.0, tf.float32, [128]), trainable=True)
         fc1 = tf.nn.relu(tf.matmul(flat, fc1_weights) + fc1_bias)
         fc1 = tf.nn.dropout(fc1, rate=1-self.keep_prob)
-        fc1 = tf.compat.v1.layers.batch_normalization(fc1)
+        # fc1 = tf.compat.v1.layers.batch_normalization(fc1)
 
         # 全连接层2
         fc2_weights = tf.Variable(tf.random.truncated_normal([128, 256], dtype=tf.float32, stddev=0.08))
         fc2_bias = tf.Variable(tf.constant(0.0, tf.float32, [256]), trainable=True)
         fc2 = tf.nn.relu(tf.matmul(fc1, fc2_weights) + fc2_bias)
         fc2 = tf.nn.dropout(fc2, rate=1-self.keep_prob)
-        fc2 = tf.compat.v1.layers.batch_normalization(fc2)
+        # fc2 = tf.compat.v1.layers.batch_normalization(fc2)
 
         # 全连接层3
         fc3_weights = tf.Variable(tf.random.truncated_normal([256, 512], dtype=tf.float32, stddev=0.08))
         fc3_bias = tf.Variable(tf.constant(0.0, tf.float32, [512]), trainable=True)
         fc3 = tf.nn.relu(tf.matmul(fc2, fc3_weights) + fc3_bias)
         fc3 = tf.nn.dropout(fc3, rate=1 - self.keep_prob)
-        fc3 = tf.compat.v1.layers.batch_normalization(fc3)
+        # fc3 = tf.compat.v1.layers.batch_normalization(fc3)
 
         # 全连接层4
         fc4_weights = tf.Variable(tf.random.truncated_normal([512, 1024], dtype=tf.float32, stddev=0.08))
         fc4_bias = tf.Variable(tf.constant(0.0, tf.float32, [1024]), trainable=True)
         fc4 = tf.nn.relu(tf.matmul(fc3, fc4_weights) + fc4_bias)
         fc4 = tf.nn.dropout(fc4, rate=1 - self.keep_prob)
-        fc4 = tf.compat.v1.layers.batch_normalization(fc4)
+        # fc4 = tf.compat.v1.layers.batch_normalization(fc4)
 
         # 输出层
         out_weights = tf.Variable(tf.random.truncated_normal([1024, 10], stddev=0.08, dtype=tf.float32))
