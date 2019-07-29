@@ -9,8 +9,8 @@ class Config(object):
     配置实验参数
     """
     def __init__(self):
-        self.data_path = '/home/xiaonan/Dataset/cifar-10/'  # 数据集路径
-        self.root_path = '/home/xiaonan'  # 项目根目录
+        self.data_path = '/home/xu/xiaonan/Dataset/cifar-10/'  # 数据集路径
+        self.root_path = '/home/xu/xiaonan'  # 项目根目录
         self.save_data_path = self.root_path + '/personal_experiments/save_data/'  # 保存文件路径
         # 数据类型
         self.data_type = ['data_batch_1', 'data_batch_2', 'data_batch_3', 'data_batch_4', 'data_batch_5', 'test_batch']

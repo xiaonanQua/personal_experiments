@@ -89,7 +89,8 @@ class Preprocess(object):
             self._preprocess_and_save_data(train_data[:-valid_len],
                                            self.save_train_path + 'preprocess_batch_' + str(i + 1) + '.p',
                                            train_labels[:-valid_len])
-            # 不像训练集，验证集需要从每个训练集批次中选取10%一起组合成验证集
+
+            # 验证集需要从每个训练集批次中选取10%一起组合成验证集
             valid_data.extend(train_data[-valid_len:])
             valid_labels.extend(train_labels[-valid_len:])
             print(np.array(valid_data).shape, np.array(valid_labels).shape)

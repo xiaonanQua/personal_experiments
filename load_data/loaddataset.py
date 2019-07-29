@@ -80,24 +80,33 @@ class DataSetOp(object):
         :param index: 索引位置
         :return:
         """
-        train_data = []  # 定义训练数据
-        label_data = []  # 定义训练标签数据
+        # 定义训练数据、标签
+        train_data = []
+        label_data = []
         # 加载的文件路径
         file_path = os.path.join(data_path, data_name)
         # 判断文件是否存在
         if os.path.isfile(file_path) is False:
             print('{}:不存在'.format(file_path))
             return None
+
         # 打开需要加载的文件
         with open(file_path, 'rb') as file:
             # 编码形式是'latin1',使得读出的数据为data形式，用于numpy使用
             batch = pk.load(file, encoding='latin1')
+
         if batch_size is not None:  # 处理训练数据
-            # 洗牌读取数据的索引
-            index_list = np.array(range(index*batch_size, (index+1)*batch_size))
-            np.random.shuffle(index_list)
-            # 随机抽取batch_size数量的训练数据并进行封装
+            # 定义索引的low和high,[low, high]。若超出批次数据总长度，则设置high为最大值
+            low = index*batch_size
+            high = (index+1)*batch_size
+            if high >= len(batch[0]):
+                high = len(batch[0])
+            index_list = np.array(range(low, high))
+            np.random.shuffle(index_list)  # 对读取数据的索引进行洗牌
+            print('fetch data min and max index :{}, {}'.format(np.min(index_list), np.max(index_list)))
+            # 抽取batch_size数量的训练数据并进行封装
             for i in index_list:
+                #print(batch[0][i])
                 # 将数据附加在训练数据中
                 train_data.append(batch[0][i])
                 label_data.append(batch[1][i])
