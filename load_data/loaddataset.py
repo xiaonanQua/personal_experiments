@@ -51,27 +51,46 @@ class DataSetOp(object):
 
         return train_data, train_label, test_data, label_name
 
-    def load_cifar_10_single_data(self, data_type):
+    def load_cifar_10_single_data(self, file_dir_path, file_name):
         """
         获取单个批次文件的训练数据
-        :param data_type: 批次文件名称
+        :param file_dir_path: 批次文件路径
+        :param file_name: 批次文件名称
         :return: 单个批次的训练数据、标签数据
         """
         # 定义训练数据、标签
-        train_data = []
+        features_data = []
         label_data = []
 
         # 文件路径
-        file_path = os.path.join(self.data_path, data_type)
+        file_path = os.path.join(file_dir_path, file_name)
         # 使用上下文环境打开文件
         with open(file_path, mode='rb') as file:
             batch_file = pk.load(file, encoding='latin1')
 
         # 将获取的训练数据进行转化
-        train_data = batch_file['data'].reshape(len(batch_file['data']), 3, 32, 32).transpose(0, 3, 2, 1)
+        features_data = batch_file['data'].reshape(len(batch_file['data']), 3, 32, 32).transpose(0, 3, 2, 1)
         label_data = batch_file['labels']
 
-        return train_data, label_data
+        return features_data, label_data
+
+    def load_single_preprocess_data(self, file_dir_path, file_name):
+        """
+        加载预处理后的批次文件
+        :param file_dir_path: 预处理文件存储目录路径
+        :param file_name: 预处理文件名称
+        :return: 返回特征和标签，以数组形式返回
+        """
+        # 读取文件的路径
+        file_path = os.path.join(file_dir_path, file_name)
+        # 以二进制读取形式打开文件
+        with open(file_path, mode='rb') as file:
+            # 以‘latin1'的编码形式进行编码
+            batch_file = pk.load(file, encoding='latin1')
+        # 获取特征和标签
+        features = batch_file[0]
+        labels = batch_file[1]
+        return features, labels
 
     def load_preprocess_data(self, data_path, data_name, batch_size=None, index=None):
         """
@@ -124,24 +143,11 @@ class DataSetOp(object):
 if __name__ == '__main__':
 
     cfiar = DataSetOp(data_path=cfg.Config().data_path)
-    # train_data, train_label, test_data, label_name = cfiar.load_cifar_10_data()
-    # print(train_data[0].shape)
-    # print(train_label[0])
-    # print(test_data.shape)
-    # print(label_name)
-    # cfg = cfg.Config()
-    # train_data, train_label = cfiar.load_preprocess_data(cfg.prepro_train_path, 'preprocess_batch_1.p', batch_size=1)
-    cfiar_data, cfiar_label = cfiar.load_cifar_10_single_data('test_batch')
-    # print(train_data[0])
-    single_data = cfiar_data[0]
-    print(single_data.shape)
-    resize_single_data = resize(single_data, (480, 360, 3))
-    print(resize_single_data.shape)
-    #plt.imshow(single_data)
-    plt.imshow(resize_single_data)
+    cfg = cfg.Config()
+    features, labels = cfiar.load_single_preprocess_data(cfg.prepro_train_path, 'preprocess_batch_1.p')
+    feature = features[0]
+    print(feature.shape)
+    plt.imshow(feature)
     plt.show()
-    # index = set()
-    # while len(index) != 128:
-    #     index.add(np.random.shuffle())
 
 

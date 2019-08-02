@@ -5,6 +5,7 @@ import numpy as np
 import pickle as pk
 import os
 from config import config as cfg
+from skimage.transform import resize
 from load_data import loaddataset as cifar
 # 调用相应的类
 cfg = cfg.Config()
@@ -45,17 +46,36 @@ class Preprocess(object):
             encoded_label[index][value] = 1  # 设置每个类的one-hot向量的值（特定类别位置为1）      
         return encoded_label
 
-    def _preprocess_and_save_data(self, features_data, save_file_path, labels_data):
+    def _resize_image(self, features, resize_tuple):
+        """
+        调整特征数据中特征大小
+        :param features:特征
+        :param resize_tuple:调整尺度（元组形式）
+        :return:调整尺度后的特征
+        """
+        # 将调整后的特征添加到列表中
+        feature_list = []
+        # 循环调整所有特征
+        for feature in features:
+            feature = resize(feature, resize_tuple)  # 调整尺寸
+            feature_list.append(feature)  # 附加特征
+        return np.array(feature_list)
+
+    def _preprocess_and_save_data(self, features_data, save_file_path, labels_data, resize=None):
         """
         归一化训练特征数据、对标签数据进行one-hot编码，并将预处理后的数据进行保存。
         :param features_data: 训练的特征数据
         :param labels_data: 标签数据
         :param save_file_path: 保存文件路径
+        :param resize: boolean,调整图片的大小，即resize=（image_width, image_height）
         :return:
         """
-        # 进行归一化和one-hot编码
+        # 调整图片大小、进行归一化、one-hot编码
+        if resize is not None:
+            features_data = self._resize_image(features_data, resize)
         features_data = self._normalize(features_data)
         labels_data = self._one_hot_encode(labels_data)
+
         print(save_file_path)
         # 使用pickle进行数据的保存
         if os.path.isfile(save_file_path) is False:
@@ -75,14 +95,16 @@ class Preprocess(object):
 
         # 读取五个批次的训练数据的图像数据、标签，进行归一化和one-hot编码
         for i in range(0, n_batches):
-            train_data, train_labels = cifar.load_cifar_10_single_data(data_type=cfg.data_type[i])
+            train_data, train_labels = cifar.load_cifar_10_single_data(file_dir_path=cfg.data_path,
+                                                                       file_name=cfg.data_type[i])
             # 划分出训练数据中的百分之十用作验证集，计算出相应的长度
             valid_len = int(len(train_data)*0.1)
             # 单个批次中预处理90%的数据
             # 分别进行特征数据的归一化、标签的one-hot向量的编码，保存为一个新文件
             self._preprocess_and_save_data(train_data[:-valid_len],
                                            self.save_train_path + 'preprocess_batch_' + str(i + 1) + '.p',
-                                           train_labels[:-valid_len])
+                                           train_labels[:-valid_len],
+                                           resize=(cfg.image_width, cfg.image_height))
 
             # 验证集需要从每个训练集批次中选取10%一起组合成验证集
             valid_data.extend(train_data[-valid_len:])
@@ -92,18 +114,21 @@ class Preprocess(object):
             # 对验证集进行预处理并保存
             self._preprocess_and_save_data(np.array(valid_data),
                                            self.save_valida_path+'preprocess_validation.p',
-                                           np.array(valid_labels),)
+                                           np.array(valid_labels),
+                                           resize=(cfg.image_width, cfg.image_height))
 
         # 获取测试集数据
-        test_data, test_label = cifar.load_cifar_10_single_data(data_type=cfg.data_type[5])
+        test_data, test_label = cifar.load_cifar_10_single_data(cfg.data_path, file_name=cfg.data_type[5])
         print(test_data.shape)
         # 对测试集数据进行预处理并保存
         self._preprocess_and_save_data(test_data,
                                        self.save_test_path+'preprocess_test.p', 
-                                       test_label)
+                                       test_label,
+                                       resize=(cfg.image_width, cfg.image_height))
 
 
 if __name__ == '__main__':
     preprocess_data = Preprocess()
+
     preprocess_data.preprocess_and_save_data()
 

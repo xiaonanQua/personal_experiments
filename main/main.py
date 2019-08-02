@@ -21,7 +21,7 @@ class Main(object):
 
     def main(self):
         self.prepro.preprocess_and_save_data()
-        self.train.train_nerual_network()
+        #self.train.train_nerual_network()
 
 
 if __name__ == '__main__':
