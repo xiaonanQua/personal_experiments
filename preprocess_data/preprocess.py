@@ -39,16 +39,13 @@ class Preprocess(object):
         :param data: 数据
         :return: 编码后的标签矩阵，（标签数量，类别数（one-hot向量））
         """
-        try:
-            encoded_label = np.zeros((len(data), 10))  # 初始化相应数量的one-hot向量（每一行全为0）
-            for index, value in enumerate(data):
-                encoded_label[index][value] = 1  # 设置每个类的one-hot向量的值（特定类别位置为1）
-        except TypeError:  # 捕捉数据为None的时候
-            print('标签是：{}'.format(data))
-            return None
+        
+        encoded_label = np.zeros((len(data), 10))  # 初始化相应数量的one-hot向量（每一行全为0）
+        for index, value in enumerate(data):
+            encoded_label[index][value] = 1  # 设置每个类的one-hot向量的值（特定类别位置为1）      
         return encoded_label
 
-    def _preprocess_and_save_data(self, features_data, save_file_path, labels_data=None):
+    def _preprocess_and_save_data(self, features_data, save_file_path, labels_data):
         """
         归一化训练特征数据、对标签数据进行one-hot编码，并将预处理后的数据进行保存。
         :param features_data: 训练的特征数据
@@ -64,10 +61,7 @@ class Preprocess(object):
         if os.path.isfile(save_file_path) is False:
             # 打开不存在的文件
             with open(save_file_path, mode='wb') as save_file:
-                if labels_data is None:  # 若标签是None，则保存的是测试集
-                    pk.dump(features_data, save_file)
-                else:  # 保存训练、验证集
-                    pk.dump((features_data, labels_data), save_file)
+                pk.dump((features_data, labels_data), save_file)
 
     def preprocess_and_save_data(self):
         """
@@ -101,11 +95,12 @@ class Preprocess(object):
                                            np.array(valid_labels),)
 
         # 获取测试集数据
-        test_data, _ = cifar.load_cifar_10_single_data(data_type=cfg.data_type[5])
+        test_data, test_label = cifar.load_cifar_10_single_data(data_type=cfg.data_type[5])
         print(test_data.shape)
         # 对测试集数据进行预处理并保存
         self._preprocess_and_save_data(test_data,
-                                       self.save_test_path+'preprocess_test.p')
+                                       self.save_test_path+'preprocess_test.p', 
+                                       test_label)
 
 
 if __name__ == '__main__':

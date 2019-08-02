@@ -3,7 +3,6 @@
 """
 import pickle as pk
 import numpy as np
-import scipy.misc
 import os
 from skimage.transform import resize
 from config import config

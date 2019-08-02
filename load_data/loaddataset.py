@@ -5,6 +5,7 @@ import pickle as pk
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from skimage.transform import resize
 from config import config as cfg
 
 
@@ -65,6 +66,7 @@ class DataSetOp(object):
         # 使用上下文环境打开文件
         with open(file_path, mode='rb') as file:
             batch_file = pk.load(file, encoding='latin1')
+
         # 将获取的训练数据进行转化
         train_data = batch_file['data'].reshape(len(batch_file['data']), 3, 32, 32).transpose(0, 3, 2, 1)
         label_data = batch_file['labels']
@@ -129,14 +131,17 @@ if __name__ == '__main__':
     # print(label_name)
     # cfg = cfg.Config()
     # train_data, train_label = cfiar.load_preprocess_data(cfg.prepro_train_path, 'preprocess_batch_1.p', batch_size=1)
-    # cfiar_data, cfiar_label = cfiar.load_cifar_10_single_data('data_batch_1')
+    cfiar_data, cfiar_label = cfiar.load_cifar_10_single_data('test_batch')
     # print(train_data[0])
-    # print(cfiar_data[0])
-    # #plt.imshow(cfiar_data[0])
-    # plt.imshow(train_data[0])
-    # plt.show()
-    index = set()
-    while len(index) != 128:
-        index.add(np.random.shuffle())
+    single_data = cfiar_data[0]
+    print(single_data.shape)
+    resize_single_data = resize(single_data, (480, 360, 3))
+    print(resize_single_data.shape)
+    #plt.imshow(single_data)
+    plt.imshow(resize_single_data)
+    plt.show()
+    # index = set()
+    # while len(index) != 128:
+    #     index.add(np.random.shuffle())
 
 
