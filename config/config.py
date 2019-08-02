@@ -10,8 +10,8 @@ class Config(object):
     """
     def __init__(self):
         # 文件路径
-        self.data_path = '/home/xiaonan/Dataset/cifar-10/'  # 数据集路径
-        self.root_path = '/home/xiaonan'  # 项目根目录
+        self.data_path = '/home/team/xiaonan/Dataset/cifar-10/'  # 数据集路径
+        self.root_path = '/home/team/xiaonan'  # 项目根目录
         self.save_data_path = self.root_path + '/personal_experiments/save_data/'  # 保存文件路径
 
         # 数据类型、图像尺度

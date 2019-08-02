@@ -61,18 +61,15 @@ class Preprocess(object):
             feature_list.append(feature)  # 附加特征
         return np.array(feature_list)
 
-    def _preprocess_and_save_data(self, features_data, save_file_path, labels_data, resize=None):
+    def _preprocess_and_save_data(self, features_data, save_file_path, labels_data):
         """
         归一化训练特征数据、对标签数据进行one-hot编码，并将预处理后的数据进行保存。
         :param features_data: 训练的特征数据
-        :param labels_data: 标签数据
         :param save_file_path: 保存文件路径
         :param resize: boolean,调整图片的大小，即resize=（image_width, image_height）
         :return:
         """
-        # 调整图片大小、进行归一化、one-hot编码
-        if resize is not None:
-            features_data = self._resize_image(features_data, resize)
+        # 进行归一化、one-hot编码
         features_data = self._normalize(features_data)
         labels_data = self._one_hot_encode(labels_data)
 
@@ -103,8 +100,8 @@ class Preprocess(object):
             # 分别进行特征数据的归一化、标签的one-hot向量的编码，保存为一个新文件
             self._preprocess_and_save_data(train_data[:-valid_len],
                                            self.save_train_path + 'preprocess_batch_' + str(i + 1) + '.p',
-                                           train_labels[:-valid_len],
-                                           resize=(cfg.image_width, cfg.image_height))
+                                           train_labels[:-valid_len]
+                                           )
 
             # 验证集需要从每个训练集批次中选取10%一起组合成验证集
             valid_data.extend(train_data[-valid_len:])
@@ -114,8 +111,8 @@ class Preprocess(object):
             # 对验证集进行预处理并保存
             self._preprocess_and_save_data(np.array(valid_data),
                                            self.save_valida_path+'preprocess_validation.p',
-                                           np.array(valid_labels),
-                                           resize=(cfg.image_width, cfg.image_height))
+                                           np.array(valid_labels)
+                                           )
 
         # 获取测试集数据
         test_data, test_label = cifar.load_cifar_10_single_data(cfg.data_path, file_name=cfg.data_type[5])
@@ -123,8 +120,8 @@ class Preprocess(object):
         # 对测试集数据进行预处理并保存
         self._preprocess_and_save_data(test_data,
                                        self.save_test_path+'preprocess_test.p', 
-                                       test_label,
-                                       resize=(cfg.image_width, cfg.image_height))
+                                       test_label
+                                       )
 
 
 if __name__ == '__main__':
