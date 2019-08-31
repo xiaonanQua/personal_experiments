@@ -1,13 +1,12 @@
-"""
-训练数据
-"""
+# -*- coding: utf-8 -*-
+
 import tensorflow as tf
-import numpy as np
+
 from neural_network.alexnet import AlexNet
 from data_load.loaddata import LoadDataSet
-from config.alexnet_config import AlexNetConf
 from data_preprocess.preprocessdata import PreprocessData
 from data_preprocess.imageprocess import ImageProcess
+from config.alexnet_config import AlexNetConf
 
 # 实例化对象
 cfg = AlexNetConf()
@@ -53,48 +52,20 @@ alexnet = AlexNet(input_width=cfg.image_width, input_height=cfg.image_height, in
                   momentum=cfg.momentum, keep_prob=cfg.keep_prob)
 
 # 开启会话，进行模型的训练
-with tf.compat.v1.Session() as sess:
-    print("进行模型的训练...")
+with tf.compat.v1.Session as sess:
+    print('评估数据集...')
     print()
-    # 创建日志文件写入对象
-    log_writer = tf.compat.v1.summary.FileWriter(logdir=cfg.log_dir, graph=sess.graph)
-    # 合并所有日志
-    summary_operation = tf.compat.v1.summary.merge_all()
     # 初始化所有变量
     sess.run(tf.compat.v1.global_variables_initializer())
 
-    # 进行模型的训练
-    for i in range(cfg.epochs):
-        # 计算训练和测试的准确度,并输出
-        print('计算准确度..')
-        train_accuracy = alexnet.evaluate(sess, train_data, train_labels, cfg.batch_size)
-        test_accuracy = alexnet.evaluate(sess, test_data, test_labels, cfg.batch_size)
-        print('训练准确度：{:.3f}'.format(train_accuracy))
-        print('测试准确度：{:.3f}'.format(test_accuracy))
-        print()
-
-        # 进行训练
-        print('训练批次{}...'.format(i+1))
-        alexnet.train_epoch(sess, train_data, train_labels, cfg.batch_size,
-                            log_writer, summary_operation, i)
-        print()
-
-    # 计算最终训练和测试的准确度
-    final_train_accuracy = alexnet.evaluate(sess, train_data, train_labels, cfg.batch_size)
-    final_test_accuracy = alexnet.evaluate(sess, test_data, test_labels, cfg.batch_size)
-    print('最终训练准确度：{:.3f}'.format(final_train_accuracy))
-    print('最终测试准确度：{:.3f}'.format(final_test_accuracy))
+    print("加载训练好的模型...")
     print()
+    alexnet.restore(sess, cfg.model_dir)
+    print('评估...')
 
-    # 保存模型
-    alexnet.save(sess, cfg.model_dir)
-    print('保存模型...')
+    train_accuracy = alexnet.evaluate(sess, train_data, train_labels, cfg.batch_size)
+    test_accuracy = alexnet.evaluate(sess, test_data, test_labels, cfg.batch_size)
+
+    print("训练精度:{:.3f}".format(train_accuracy))
+    print("测试精度：{:.3f}".format(test_accuracy))
     print()
-
-print('训练结束...')
-
-
-
-
-
-

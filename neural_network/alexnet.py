@@ -175,7 +175,7 @@ class AlexNet(object):
         step = 0
         for offset in (0, num_example, batch_size):
             end = offset + batch_size
-            batch_x, batch_y = x_data[offset:end], y_data[offset, end]
+            batch_x, batch_y = x_data[offset:end], y_data[offset:end]
             if file_writer is not None and summary_operation is not None:
                 _, summary = sess.run([self.training_operation, summary_operation],
                                       feed_dict={self.x: batch_x, self.y: batch_y,
@@ -200,7 +200,7 @@ class AlexNet(object):
         total_accuracy = 0
         for offset in range(0, num_examples, batch_size):
             end = offset+batch_size
-            batch_x, batch_y = x_data[offset:end], y_data[offset:end]
+            batch_x, batch_y = x_data[offset: end], y_data[offset: end]
             # 每批次数据的准确率
             batch_accuracy = sess.run(self.accuracy_operation,
                                       feed_dict={self.x: batch_x,

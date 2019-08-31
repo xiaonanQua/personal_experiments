@@ -9,46 +9,42 @@ class Config(object):
     配置实验参数
     """
     def __init__(self):
-        # 文件路径
-        self.data_path = '/home/team/xiaonan/Dataset/cifar-10/'  # 数据集路径
-        self.root_path = '/home/team/xiaonan'  # 项目根目录
-        self.save_data_path = self.root_path + '/personal_experiments/save_data/'  # 保存文件路径
+        # 数据集根目录、项目根目录
+        self.root_dataset = '/home/xiaonan/Dataset/'
+        self.root_project = '/home/xiaonan/python_project/tensorflow_learn/'
 
-        # 数据类型、图像尺度
-        self.data_type = ['data_batch_1', 'data_batch_2', 'data_batch_3', 'data_batch_4', 'data_batch_5', 'test_batch']
-        self.image_width = 227
-        self.image_height = 227
+        # cifar-10数据集目录、文件名称
+        self.cifar_10_dir = self.root_dataset + 'cifar-10/'
+        self.cifar_file_name = {'meta': 'batches.meta',
+                                'train': ['data_batch_1', 'data_batch_2', 'data_batch_3', 'data_batch_4', 'data_batch_5'],
+                                'test': 'test_batch'}
 
-        # 预处理后的训练、验证数据集、训练模型的保存路径
-        self.prepro_train_path = self.save_data_path + 'preprocess_train_files/'
-        self.prepro_valid_path = self.save_data_path + 'preprocess_valid_files/'
-        self.prepro_test_path = self.save_data_path + 'preprocess_test_files/'
-        self.train_model_path = self.save_data_path + 'train_model/'
+        # svhn数据集目录、文件名称
+        self.svhn_dir = self.root_dataset + 'svhn/'
+        self.svhn_file_name = ['train_32.mat', 'test_32.mat', 'extra_32.mat']
 
-        # 实验的超参数配置
-        self.hyperparam = {'epochs': 10, 'batch_size': 2048, 'keep_prob': 0.7, 'learning_rate': 0.001}
+        # mnist数据集目录,文件名称
+        self.mnist_dir = self.root_dataset + 'mnist/'
+        self.mnist_file_name = ['train-images-idx3-ubyte.gz', 'train-labels-idx1-ubyte.gz',
+                                't10k-images-idx3-ubyte.gz', 't10k-labels-idx1-ubyte.gz']
+
+        # 数据保存根目录、模型保存目录、日志文件保存目录
+        self.data_save_dir = self.root_project + 'data_save/'
+        self.model_dir = self.data_save_dir + 'model'
+        self.log_dir = self.data_save_dir + 'log'
 
         # 初始化文件夹
-        self.init_dir()
+        self._init()
 
-    def init_dir(self):
-        """
-        检测是否存在保存训练、验证数据的文件夹
-        :return:
-        """
-        # 若保存预处理文件的文件夹、训练的模型文件夹不存在则创建相应的文件夹
-        if os.path.exists(os.path.join(self.root_path, self.save_data_path)) is False:
-            os.mkdir(os.path.join(self.root_path, self.save_data_path))
-            print('create file or directory:{}'.format(os.path.join(self.root_path, self.save_data_path)))
-        elif os.path.exists(self.prepro_train_path) is False:
-            os.mkdir(self.prepro_train_path)
-            print('create file or directory:{}'.format(self.prepro_train_path))
-        elif os.path.exists(self.prepro_valid_path) is False:
-            os.mkdir(self.prepro_valid_path)
-            print('create file or directory:{}'.format(self.prepro_valid_path))
-        elif os.path.exists(self.prepro_test_path) is False:
-            os.mkdir(self.prepro_test_path)
-            print('create file or directory:{}'.format(self.prepro_test_path))
-        elif os.path.exists(self.train_model_path) is False:
-            os.mkdir(self.train_model_path)
-            print('create file or directory:{}'.format(self.train_model_path))
+    def _init(self):
+        # 若文件夹不存在，则创建
+        if os.path.exists(self.data_save_dir) is False:
+            os.mkdir(self.data_save_dir)
+        elif os.path.exists(self.model_dir) is False:
+            os.mkdir(self.model_dir)
+        elif not os.path.exists(self.log_dir):
+            os.mkdir(self.log_dir)
+
+
+if __name__ == '__main__':
+    cfg = Config()
