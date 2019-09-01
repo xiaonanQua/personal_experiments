@@ -10,8 +10,8 @@ class Config(object):
     """
     def __init__(self):
         # 数据集根目录、项目根目录
-        self.root_dataset = '/home/xiaonan/Dataset/'
-        self.root_project = '/home/xiaonan/python_project/tensorflow_learn/'
+        self.root_dataset = '/home/team/xiaonan/Dataset/'
+        self.root_project = '/home/team/xiaonan/personal_experiments/'
 
         # cifar-10数据集目录、文件名称
         self.cifar_10_dir = self.root_dataset + 'cifar-10/'
