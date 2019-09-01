@@ -128,53 +128,6 @@ class LoadDataSet(object):
 
         return np.array(images_list), np.array(labels_list)
 
-    def batch_and_shuffle_data(self, images, labels, batch_size, data_queue, shuffle=False):
-        """
-        获得批次大小的数据并进行洗牌功能
-        :param images: 图像数据
-        :param labels: 标签数据
-        :param batch_size: 批次大小
-        :param data_queue: 队列对象,用于创建文件队列
-        :param shuffle: 是否打乱批次数据的顺序
-        :return:
-        """
-        # 定义批次图像、标签数据
-        batch_images = []
-        batch_labels = []
-
-        # 获取batch_size大小的数据
-        for i in range(batch_size):
-            # 若队列为空,则将总的数据添加到队列中
-            if data_queue.is_empty():
-                data_queue.data_enqueue(images=images, labels=labels)
-            # 从队列中出队数据
-            image, label = data_queue.dequeue()
-            # 将图像矩阵、标签添加到批次列表中
-            batch_images.append(image)
-            batch_labels.append(label)
-
-        if shuffle:
-            # 定义洗牌后的批次图像、标签数据
-            shuffle_batch_images = []
-            shuffle_batch_labels = []
-            # 根据batch_size生成索引
-            index_list = [x for x in range(batch_size)]
-            # 使用numpy中随机洗牌函数对索引进行洗牌
-            np.random.shuffle(index_list)
-            print("洗牌后的索引：{}".format(index_list))
-            for index in index_list:
-                shuffle_batch_images.append(batch_images[index])
-                shuffle_batch_labels.append(batch_labels[index])
-
-            # 将洗牌后的数据赋值给原来变量
-            batch_images = shuffle_batch_images
-            batch_labels = shuffle_batch_labels
-
-        # 将列表数据转化成N维数组数据
-        batch_images, batch_labels =np.array(batch_images), np.array(batch_labels)
-
-        return batch_images, batch_labels
-
     def multi_thread_load_data(self, file_dir, file_name, dtype=tf.uint8, batch_size=None, capacity=None):
         """
         多线程加载文件数据
@@ -274,29 +227,67 @@ class LoadDataSet(object):
 
         return images, labels
 
-    def load_cifar_10(self, file_dir, file_name):
+    def load_cifar_10(self, file_dir, train_file_name=None, test_file_name=None, test_range=None):
         """
         读取cifar-10数据集
-        :param file_dir: 批次文件目录
-        :param file_name: 批次文件名称
-        :return: 单个批次的训练数据、标签数据
+        返回训练图像数据、标签，格式分别为[样本数量，高度，宽度，通道]，[样本数量](实时标签数字，非one-hot向量)
+        测试数据和训练数据格式一样
+        :param file_dir: 文件目录
+        :param train_file_name: 训练文件名称列表,格式：['batch_1', 'batch_2',...]
+        :param test_file_name: 测试文件名称列表,格式'test_batch'
+        :param test_range: 由于电脑内存有限，故当程序处于测试情况下，无法加载所有数据，故设定一个值，只选取小范围的数据
+        :return: 训练\测试数据、标签数据
         """
-        # 定义训练数据、标签
-        features_data = []
-        label_data = []
+        # 初始化训练、测试数据列表
+        train_data, train_labels, test_data, test_labels = [], [], [], []
 
-        # 文件路径
-        file_path = os.path.join(file_dir, file_name)
-        # 使用上下文环境打开文件
-        with open(file_path, mode='rb') as file:
-            batch_file = pk.load(file, encoding='latin1')
+        # 加载训练数据
+        if train_file_name is not None:
+            # 读取文件列表中所有数据
+            for batch_name in train_file_name:
+                print('读取训练数据：'+ batch_name + '...')
+                # 文件路径
+                file_path = os.path.join(file_dir, batch_name)
 
-        # 将获取的训练数据进行转化
-        images = batch_file['data'].reshape(len(batch_file['data']), 3, 32, 32).transpose(0, 3, 2, 1)
-        labels = batch_file['labels']
+                # 使用上下文环境打开文件
+                with open(file_path, mode='rb') as file:
+                    batch_file = pk.load(file, encoding='latin1')
 
-        return images, labels
+                # 将获取的训练数据转化成形状为[样本数量，高度，宽度，颜色通道]的数据
+                images = batch_file['data'].reshape(len(batch_file['data']), 3, 32, 32).transpose(0, 3, 2, 1)
+                labels = batch_file['labels']
 
+                # 将数据和标签附加进列表中
+                train_data.extend(images)
+                train_labels.extend(labels)
+
+            # 将训练数据转化成4维数组形式
+            train_data = np.array(train_data)
+            # 选取小范围的数据
+            if test_range is not None:
+                train_data = train_data[0:test_range]
+                train_labels = train_labels[0:test_range]
+
+        # 加载测试数据
+        if test_file_name is not None:
+            print('读取测试数据：' + test_file_name + '...')
+            # 文件路径
+            file_path = os.path.join(file_dir, test_file_name)
+
+            # 使用上下文环境打开文件
+            with open(file_path, mode='rb') as file:
+                batch_file = pk.load(file, encoding='latin1')
+
+            # 将获取的训练数据转化成形状为[样本数量，高度，宽度，颜色通道]的数据
+            test_data = batch_file['data'].reshape(len(batch_file['data']), 3, 32, 32).transpose(0, 3, 2, 1)
+            test_labels = batch_file['labels']
+
+            # 选取小范围的数据
+            if test_range is not None:
+                test_data = test_data[0:test_range]
+                test_labels = test_labels[0:test_range]
+
+        return train_data, train_labels, test_data, test_labels
 
 if __name__ == '__main__':
     # 实例化数据集,图像处理类

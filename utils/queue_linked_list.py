@@ -82,8 +82,8 @@ class QueueLink:
         # 初始化队头，队尾
         self.front=self.rear=Node()
         # 获取样本总数
-        num_examples = labels.shape[0]
-        if num_examples != images.shape[0]:
+        num_examples = len(images)
+        if num_examples != len(labels):
             raise ValueError('图像矩阵样本和标签样本数量不一致')
         # 循环将数据进队
         for i in range(num_examples):

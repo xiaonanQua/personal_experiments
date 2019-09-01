@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.pylab as lab
 import numpy as np
 from skimage.transform import resize
+import utils.tools as tool
 
 
 class ImageProcess(object):
@@ -37,6 +38,7 @@ class ImageProcess(object):
         :param resize_shape: 重塑形状，形状格式：[高度， 宽度， 通道]
         :return: 重塑后的图像数据,数组形式
         """
+        print("进行图像大小的重塑...")
         # 获得样本数量,定义重塑图像列表
         num_examples = images.shape[0]
         image_list = []
@@ -46,4 +48,5 @@ class ImageProcess(object):
             # 重塑制定形状的图片并附加到列表中
             image = resize(images[i], output_shape=resize_shape)
             image_list.append(image)
+            tool.view_bar("重塑图像大小", i+1, num_examples)
         return np.array(image_list)

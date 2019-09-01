@@ -143,7 +143,7 @@ class PreprocessData(object):
         train_labels = labels[:-valid_len]
         # 验证集
         valid_data = images[-valid_len:]
-        valid_labels = images[-valid_len:]
+        valid_labels = labels[-valid_len:]
 
         return train_data, train_labels, valid_data, valid_labels
 
@@ -194,6 +194,53 @@ class PreprocessData(object):
                                         save_file_name+'_batch-{}-of-{}'.format(i+1, num_batch))
             else:
                 raise ValueError("不存在{}保存格式".format(save_type))
+
+    def batch_and_shuffle_data(self, images, labels, batch_size, data_queue, shuffle=False):
+        """
+        获得批次大小的数据并进行洗牌功能
+        :param images: 图像数据
+        :param labels: 标签数据
+        :param batch_size: 批次大小
+        :param data_queue: 队列对象,用于创建文件队列
+        :param shuffle: 是否打乱批次数据的顺序
+        :return:
+        """
+        # 定义批次图像、标签数据
+        batch_images = []
+        batch_labels = []
+
+        # 获取batch_size大小的数据
+        for i in range(batch_size):
+            # 若队列为空,则将总的数据添加到队列中
+            if data_queue.is_empty():
+                data_queue.data_enqueue(images=images, labels=labels)
+            # 从队列中出队数据
+            image, label = data_queue.dequeue()
+            # 将图像矩阵、标签添加到批次列表中
+            batch_images.append(image)
+            batch_labels.append(label)
+
+        if shuffle:
+            # 定义洗牌后的批次图像、标签数据
+            shuffle_batch_images = []
+            shuffle_batch_labels = []
+            # 根据batch_size生成索引
+            index_list = [x for x in range(batch_size)]
+            # 使用numpy中随机洗牌函数对索引进行洗牌
+            np.random.shuffle(index_list)
+            print("洗牌后的索引：{}".format(index_list))
+            for index in index_list:
+                shuffle_batch_images.append(batch_images[index])
+                shuffle_batch_labels.append(batch_labels[index])
+
+            # 将洗牌后的数据赋值给原来变量
+            batch_images = shuffle_batch_images
+            batch_labels = shuffle_batch_labels
+
+        # 将列表数据转化成N维数组数据
+        batch_images, batch_labels =np.array(batch_images), np.array(batch_labels)
+
+        return batch_images, batch_labels
 
 
 

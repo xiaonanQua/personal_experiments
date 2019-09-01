@@ -1,100 +1,87 @@
 """
-训练数据
+训练操作
 """
 import tensorflow as tf
-import numpy as np
-from neural_network.alexnet import AlexNet
-from data_load.loaddata import LoadDataSet
-from config.alexnet_config import AlexNetConf
+from utils.queue_linked_list import QueueLink
 from data_preprocess.preprocessdata import PreprocessData
-from data_preprocess.imageprocess import ImageProcess
-
-# 实例化对象
-cfg = AlexNetConf()
-data = LoadDataSet()
-preprocess = PreprocessData()
-image_process = ImageProcess()
-
-print('读取cifar-10数据集...')
-# cifar-10训练、测试数据名称列表
-train_list = cfg.cifar_file_name['train']
-test_list = cfg.cifar_file_name['test']
-
-# 初始化训练、测试数据列表
-train_data, train_labels = [], []
-# 读取pickle中所有数据
-for batch_name in train_list:
-    print(batch_name)
-    # 获取批次数据
-    batch_data, batch_labels = data.load_cifar_10(file_dir=cfg.cifar_10_dir,
-                                                     file_name=batch_name)
-    # 将数据和标签附加进列表中
-    train_data.extend(batch_data)
-    train_labels.extend(batch_labels)
-test_data, test_labels = data.load_cifar_10(file_dir=cfg.cifar_10_dir,
-                                               file_name=test_list)
-# 将读取的训练数据转化成数组, 并和测试数据一起重塑图像大小
-train_data = image_process.image_resize(np.array(train_data), resize_shape=[cfg.image_height,
-                                                                            cfg.image_width,
-                                                                            cfg.image_channels])
-test_data = image_process.image_resize(test_data, resize_shape=[cfg.image_height,
-                                                                cfg.image_height,
-                                                                cfg.image_channels])
-# 将标签列表转化成one-hot向量
-train_labels = preprocess.one_hot_encode(train_labels, num_classes=cfg.num_classes)
-test_labels = preprocess.one_hot_encode(test_labels, num_classes=cfg.num_classes)
-
-print("读取的cifar-10数据集的训练和测试形状:")
-print(train_data.shape, train_labels.shape, test_data.shape, test_labels.shape)
-
-# 实例化网络
-alexnet = AlexNet(input_width=cfg.image_width, input_height=cfg.image_height, input_channels=cfg.image_channels,
-                  num_classes=cfg.num_classes, learning_rate=cfg.learning_rate,
-                  momentum=cfg.momentum, keep_prob=cfg.keep_prob)
-
-# 开启会话，进行模型的训练
-with tf.compat.v1.Session() as sess:
-    print("进行模型的训练...")
-    print()
-    # 创建日志文件写入对象
-    log_writer = tf.compat.v1.summary.FileWriter(logdir=cfg.log_dir, graph=sess.graph)
-    # 合并所有日志
-    summary_operation = tf.compat.v1.summary.merge_all()
-    # 初始化所有变量
-    sess.run(tf.compat.v1.global_variables_initializer())
-
-    # 进行模型的训练
-    for i in range(cfg.epochs):
-        # 计算训练和测试的准确度,并输出
-        print('计算准确度..')
-        train_accuracy = alexnet.evaluate(sess, train_data, train_labels, cfg.batch_size)
-        test_accuracy = alexnet.evaluate(sess, test_data, test_labels, cfg.batch_size)
-        print('训练准确度：{:.3f}'.format(train_accuracy))
-        print('测试准确度：{:.3f}'.format(test_accuracy))
-        print()
-
-        # 进行训练
-        print('训练批次{}...'.format(i+1))
-        alexnet.train_epoch(sess, train_data, train_labels, cfg.batch_size,
-                            log_writer, summary_operation, i)
-        print()
-
-    # 计算最终训练和测试的准确度
-    final_train_accuracy = alexnet.evaluate(sess, train_data, train_labels, cfg.batch_size)
-    final_test_accuracy = alexnet.evaluate(sess, test_data, test_labels, cfg.batch_size)
-    print('最终训练准确度：{:.3f}'.format(final_train_accuracy))
-    print('最终测试准确度：{:.3f}'.format(final_test_accuracy))
-    print()
-
-    # 保存模型
-    alexnet.save(sess, cfg.model_dir)
-    print('保存模型...')
-    print()
-
-print('训练结束...')
 
 
+def train_epoch(sess, net, train_data, train_labels, batch_size=128, valid_size=None,
+                file_writer=None, summary_operation=None, epoch_number=None):
+    """
+    使用一个128批次数量的样本并随机梯度下降训练我们的模型
+    :param sess: 用于计算的会话
+    :param net: 用于训练的网络结构
+    :param train_data: 训练的特征数据
+    :param train_labels: 训练的标签数据
+    :param batch_size: 批次大小
+    :param valid_size: 若值不为空，则对训练集按比例值划分出验证集
+    :param file_writer: 日志文件写入对象
+    :param summary_operation: 日志操作
+    :param epoch_number: 训练周期数
+    :return:
+    """
+    # 样本数量,定义验证集
+    num_example = len(train_data)
+    valid_data, valid_labels = [], []
+    # 实例化队列对象，用于批次数据的读取
+    queue = QueueLink()
+    # 实例化数据预处理对象
+    preprocess = PreprocessData()
+
+    # 若valid_size不为空，则对训练集按一定比例划分数据
+    if valid_size is not None:
+        train_data, train_labels, valid_data, valid_labels = preprocess.divide_valid_data(train_data,
+                                                                                          train_labels,
+                                                                                          valid_size)
+    print(train_data.shape, train_labels.shape, valid_data.shape, valid_labels.shape)
+    # 周期循环进行训练
+    for epoch in range(1, epoch_number+1):
+        # 每周期训练步骤等于总样本//批次大小
+        for step in range(int(num_example/batch_size)):
+            # 获取批次训练数据
+            batch_data, batch_labels = preprocess.batch_and_shuffle_data(train_data, train_labels, batch_size,
+                                                                         queue, True)
+            # 进行训练并保存日志文件
+            if file_writer is not None and summary_operation is not None:
+                _, summary = sess.run([net.training_operation, summary_operation],
+                                      feed_dict={net.x: batch_data, net.y: batch_labels,
+                                                 net.dropout_keep_prob: net.keep_prob})
+                file_writer.add_summary(summary, epoch_number * (num_example // batch_size + 1) + step)
+            else:
+                sess.run(net.training_operation, feed_dict={net.x: batch_data, net.y: batch_labels,
+                                                            net.dropout_keep_prob: net.keep_prob})
+
+            # 获得loss值和批次准确率
+            loss = sess.run(net.loss_operation, feed_dict={net.x: batch_data, net.y: batch_labels,
+                                                           net.dropout_keep_prob: 1.0})
+            batch_accuracy = sess.run(net.accuracy_operation, feed_dict={net.x: batch_data,
+                                                                         net.y: batch_labels,
+                                                                         net.dropout_keep_prob: 1.0})
+            # 计算验证准确率
+            if valid_size is not None:
+                valid_accuracy = sess.run(net.accuracy_operation, feed_dict={net.x: valid_data,
+                                                                             net.y: valid_labels,
+                                                                             net.dropout_keep_prob: 1.0})
+            else:
+                valid_accuracy = None
+
+            # 输出得到的值
+            print("epoch：{}，step:{}/{},loss:{},  batch_accuracy:{},  valid_accuracy:{}".format(epoch,
+                                                                                           step+1,
+                                                                                           num_example//batch_size,
+                                                                                           loss,
+                                                                                           batch_accuracy,
+                                                                                           valid_accuracy))
+            print()
 
 
-
-
+def save(sess, file_name):
+    """
+    对训练的模型进行保存
+    :param sess: 会话
+    :param file_name:保存的文件名称
+    :return:
+    """
+    saver = tf.compat.v1.train.Saver()
+    saver.save(sess, file_name)
