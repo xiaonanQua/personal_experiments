@@ -15,13 +15,13 @@ def __unpickle(file):
 
 
 def read_cifar_10(image_width, image_height):
-
-    batch_1 = __unpickle('./cifar-10/data_batch_1')
-    batch_2 = __unpickle('./cifar-10/data_batch_2')
-    batch_3 = __unpickle('./cifar-10/data_batch_3')
-    batch_4 = __unpickle('./cifar-10/data_batch_4')
-    batch_5 = __unpickle('./cifar-10/data_batch_5')
-    test_batch = __unpickle('./cifar-10/test_batch')
+    cifar_10_dir = '/home/team/xiaonan/Dataset'
+    batch_1 = __unpickle(cifar_10_dir+'/cifar-10/data_batch_1')
+    batch_2 = __unpickle(cifar_10_dir+'/cifar-10/data_batch_2')
+    batch_3 = __unpickle(cifar_10_dir+'/cifar-10/data_batch_3')
+    batch_4 = __unpickle(cifar_10_dir+'/cifar-10/data_batch_4')
+    batch_5 = __unpickle(cifar_10_dir+'/cifar-10/data_batch_5')
+    test_batch = __unpickle(cifar_10_dir+'/cifar-10/test_batch')
 
     classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 

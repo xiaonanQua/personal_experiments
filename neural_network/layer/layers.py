@@ -119,7 +119,7 @@ class Layers(object):
         :return: 丢弃后的特征
         """
         with tf.name_scope(name):
-            return tf.nn.dropout(features, rate=1-keep_prob, name='dropout')
+            return tf.nn.dropout(features, keep_prob=keep_prob, name='dropout')
 
     def local_reponse_normalization(self, features, name='lrn'):
         """

@@ -158,14 +158,14 @@ class AlexNet:
 
         # Training.
         with tf.name_scope('training'):
-            loss_operation = tf.reduce_mean(cross_entropy, name='loss_operation')
-            tf.summary.scalar(name='loss', tensor=loss_operation)
+            self.loss_operation = tf.reduce_mean(cross_entropy, name='loss_operation')
+            tf.summary.scalar(name='loss', tensor=self.loss_operation)
 
             optimizer = tf.train.MomentumOptimizer(learning_rate=self.learning_rate, momentum=self.momentum)
 
             # self.training_operation = optimizer.minimize(loss_operation, name='training_operation')
 
-            grads_and_vars = optimizer.compute_gradients(loss_operation)
+            grads_and_vars = optimizer.compute_gradients(self.loss_operation)
             self.training_operation = optimizer.apply_gradients(grads_and_vars, name='training_operation')
 
             for grad, var in grads_and_vars:
@@ -196,6 +196,9 @@ class AlexNet:
             else:
                 sess.run(self.training_operation, feed_dict={self.X: batch_x, self.Y: batch_y,
                                                              self.dropout_keep_prob: self.keep_prob})
+            loss = sess.run(self.loss_operation, feed_dict={self.X: batch_x, self.Y: batch_y,
+                                                            self.dropout_keep_prob: 1.0})
+            print('loss:{}'.format(loss))
 
     def evaluate(self, sess, X_data, Y_data, batch_size=128):
         num_examples = len(X_data)

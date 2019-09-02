@@ -25,7 +25,7 @@ class PreprocessData(object):
         :return:
         """
         # 初始化相应数量的one-hot向量
-        encode_labels = np.zeros([len(labels), num_classes])
+        encode_labels = np.zeros([len(labels), num_classes], dtype=np.float32)
         for index, value in enumerate(labels):
             if value == 10:
                 encode_labels[index][0] = 1  # 若标签值为10，则第一项设置成1
@@ -238,7 +238,7 @@ class PreprocessData(object):
             batch_labels = shuffle_batch_labels
 
         # 将列表数据转化成N维数组数据
-        batch_images, batch_labels =np.array(batch_images), np.array(batch_labels)
+        batch_images, batch_labels = np.array(batch_images), np.array(batch_labels)
 
         return batch_images, batch_labels
 

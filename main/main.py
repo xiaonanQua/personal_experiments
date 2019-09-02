@@ -8,6 +8,7 @@ from config.alexnet_config import AlexNetConf
 from data_preprocess.preprocessdata import PreprocessData
 from data_preprocess.imageprocess import ImageProcess
 from train_and_test import train, evaluate
+from original.dataset_helper import read_cifar_10
 
 # 实例化对象
 cfg = AlexNetConf()
@@ -17,21 +18,23 @@ image_process = ImageProcess()
 
 print('读取cifar-10数据集...')
 # 加载cifar-10训练、测试数据
-train_data, train_labels, test_data, test_labels = data.load_cifar_10(file_dir=cfg.cifar_10_dir,
-                                                                      train_file_name=cfg.cifar_file_name['train'],
-                                                                      test_file_name=cfg.cifar_file_name['test'],
-                                                                      )
+# train_data, train_labels, test_data, test_labels = data.load_cifar_10(file_dir=cfg.cifar_10_dir,
+#                                                                       train_file_name=cfg.cifar_file_name['train'],
+#                                                                       test_file_name=cfg.cifar_file_name['test'],
+#                                                                       )
+train_data, train_labels, test_data, test_labels = read_cifar_10(image_width=cfg.image_width,
+                                                                 image_height=cfg.image_height)
 
-# 将读取的训练数据转化成数组, 并和测试数据一起重塑图像大小
-train_data = image_process.image_resize(train_data, resize_shape=[cfg.image_height,
-                                                                            cfg.image_width,
-                                                                            cfg.image_channels])
-test_data = image_process.image_resize(test_data, resize_shape=[cfg.image_height,
-                                                                cfg.image_height,
-                                                                cfg.image_channels])
-# 将标签列表转化成one-hot向量
-train_labels = preprocess.one_hot_encode(train_labels, num_classes=cfg.num_classes)
-test_labels = preprocess.one_hot_encode(test_labels, num_classes=cfg.num_classes)
+# # 将读取的训练数据转化成数组, 并和测试数据一起重塑图像大小
+# train_data = image_process.image_resize(train_data, resize_shape=[cfg.image_height,
+#                                                                             cfg.image_width,
+#                                                                             cfg.image_channels])
+# test_data = image_process.image_resize(test_data, resize_shape=[cfg.image_height,
+#                                                                 cfg.image_height,
+#                                                                 cfg.image_channels])
+# # 将标签列表转化成one-hot向量
+# train_labels = preprocess.one_hot_encode(train_labels, num_classes=cfg.num_classes)
+# test_labels = preprocess.one_hot_encode(test_labels, num_classes=cfg.num_classes)
 
 print("读取的cifar-10数据集的训练和测试形状:")
 print(train_data.shape, train_labels.shape, test_data.shape, test_labels.shape)
@@ -54,7 +57,7 @@ with tf.compat.v1.Session() as sess:
 
     # 进行模型的训练
     train.train_epoch(sess, alexnet, train_data, train_labels, batch_size=cfg.batch_size,
-                      valid_size=0.1, file_writer=log_writer, summary_operation=summary_operation,
+                      file_writer=log_writer, summary_operation=summary_operation,
                       epoch_number=cfg.epochs)
 
     # 保存模型
@@ -65,8 +68,6 @@ with tf.compat.v1.Session() as sess:
 
     # 评估模型
     evaluate.evaluate(sess, alexnet, train_data, train_labels, test_data, test_labels, cfg.model_dir)
-
-
 
 
 

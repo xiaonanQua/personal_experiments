@@ -138,8 +138,7 @@ class AlexNet(object):
             self.loss_operation = tf.reduce_mean(cross_entropy, name='loss_operation')
             tf.compat.v1.summary.scalar(name='loss', tensor=self.loss_operation)
             # 优化器
-            optimizer = tf.compat.v1.train.MomentumOptimizer(learning_rate=self.learning_rate,
-                                                   momentum=self.momentum)
+            optimizer = tf.compat.v1.train.MomentumOptimizer(learning_rate=self.learning_rate, momentum=self.momentum)
             # 获取梯度和变量
             grads_and_vars = optimizer.compute_gradients(self.loss_operation)
             # 训练操作

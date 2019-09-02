@@ -34,14 +34,15 @@ def train_epoch(sess, net, train_data, train_labels, batch_size=128, valid_size=
         train_data, train_labels, valid_data, valid_labels = preprocess.divide_valid_data(train_data,
                                                                                           train_labels,
                                                                                           valid_size)
-    print(train_data.shape, train_labels.shape, valid_data.shape, valid_labels.shape)
+    # print(train_data.shape, train_labels.shape, valid_data.shape, valid_labels.shape)
     # 周期循环进行训练
     for epoch in range(1, epoch_number+1):
         # 每周期训练步骤等于总样本//批次大小
-        for step in range(int(num_example/batch_size)):
+        for step in range(0, num_example, batch_size):
+            end = step + batch_size
             # 获取批次训练数据
-            batch_data, batch_labels = preprocess.batch_and_shuffle_data(train_data, train_labels, batch_size,
-                                                                         queue, True)
+            # batch_data, batch_labels = preprocess.batch_and_shuffle_data(train_data, train_labels, batch_size, queue)
+            batch_data, batch_labels = train_data[step:end], train_labels[step:end]
             # 进行训练并保存日志文件
             if file_writer is not None and summary_operation is not None:
                 _, summary = sess.run([net.training_operation, summary_operation],

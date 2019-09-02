@@ -2,8 +2,8 @@
 
 import tensorflow as tf
 
-from alexnet import AlexNet
-from dataset_helper import read_cifar_10
+from original.alexnet import AlexNet
+from original.dataset_helper import read_cifar_10
 
 INPUT_WIDTH = 70
 INPUT_HEIGHT = 70
