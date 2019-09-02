@@ -18,10 +18,9 @@ image_process = ImageProcess()
 print('读取cifar-10数据集...')
 # 加载cifar-10训练、测试数据
 train_data, train_labels, test_data, test_labels = data.load_cifar_10(file_dir=cfg.cifar_10_dir,
-                                                                      train_file_name=cfg.cifar_file_name['train'][0:2],
+                                                                      train_file_name=cfg.cifar_file_name['train'],
                                                                       test_file_name=cfg.cifar_file_name['test'],
-                                                                      test_range=64)
-
+                                                                      )
 
 # 将读取的训练数据转化成数组, 并和测试数据一起重塑图像大小
 train_data = image_process.image_resize(train_data, resize_shape=[cfg.image_height,

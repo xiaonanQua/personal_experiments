@@ -13,7 +13,7 @@ class AlexNetConf(Config):
         self.num_classes = 10
         # 实验的超参数配置
         self.epochs = 10
-        self.batch_size = 32
+        self.batch_size = 128
         self.learning_rate = 0.001  # 原始是0.01
         self.momentum = 0.9
         self.keep_prob = 0.5

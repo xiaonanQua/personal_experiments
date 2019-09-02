@@ -156,5 +156,6 @@ class AlexNet(object):
             self.accuracy_operation = tf.reduce_mean(tf.cast(correct_prediction, tf.float32), name='accuracy_operation')
             tf.compat.v1.summary.scalar(name='accuracy', tensor=self.accuracy_operation)
 
+
 if __name__ == '__main__':
     alexnet = AlexNet()
