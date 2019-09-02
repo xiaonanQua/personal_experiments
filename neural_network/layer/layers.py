@@ -38,7 +38,7 @@ class Layers(object):
                 self.random_value(shape=[filter_width, filter_height, input_channels, filters_count]),
                 name='filters')
             # 执行卷积运算,添加偏置值，使用ReLU激活函数进行激活
-            convs = tf.nn.conv2d(features, filters, strides=[1, stride_x, stride_y, 1], padding=padding, name='convs')
+            convs = tf.nn.conv2d(features, filters, strides=[1, stride_y, stride_x, 1], padding=padding, name='convs')
             preactivations = tf.nn.bias_add(convs, biases, name='preactivations')
             activations = tf.nn.relu(preactivations, name='activations')
 
@@ -67,8 +67,9 @@ class Layers(object):
         :return: 汇聚后的特征
         """
         with tf.name_scope(name):
-            return tf.nn.max_pool2d(features, ksize=[1, filters_width, filters_height, 1],
-                                    strides=[1, stride_x, stride_y, 1], padding=padding, name='max_pool')
+            pool = tf.nn.max_pool2d(features, ksize=[1, filters_width, filters_height, 1],
+                                    strides=[1, stride_y, stride_x, 1], padding=padding, name='max_pool')
+        return pool
 
     def fully_connected(self, features, input_num, output_num, relu=True,
                          init_biases=False, name='fully_connected'):
@@ -93,7 +94,7 @@ class Layers(object):
             preactivations = tf.nn.bias_add(tf.matmul(features, weights), biases, name='preactivations')
             # 使用激活函数进行激活
             if relu:
-                activations = tf.nn.relu(preactivations)
+                activations = tf.nn.relu(preactivations, name='activations')
 
             # 将参数变量、线性值、激活值添加到日志中，用于tensorboard查看
             with tf.name_scope('weight_summaries'):
@@ -129,8 +130,9 @@ class Layers(object):
         :return:
         """
         with tf.name_scope(name):
-            return tf.nn.local_response_normalization(features, depth_radius=2, alpha=10**-4,
+            lrn = tf.nn.local_response_normalization(features, depth_radius=2, alpha=10**-4,
                                                       beta=0.75, name='local_response_normalization')
+        return lrn
 
     def random_value(self, shape, ):
         """

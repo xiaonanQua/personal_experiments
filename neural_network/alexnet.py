@@ -106,6 +106,7 @@ class AlexNet(object):
             print(pool_5_shape)
             # 输入大小
             flattened_input_size = pool_5_shape[1]*pool_5_shape[2]*pool_5_shape[3]
+            print(flattened_input_size)
             layer_6_fc = layer.fully_connected(features=tf.reshape(layer_5_pool, shape=[-1, flattened_input_size]),
                                                input_num=flattened_input_size, output_num=4096,
                                                relu=True, init_biases=True)
@@ -122,7 +123,7 @@ class AlexNet(object):
         # 8:输出层
         # input:4096-->fully connected:neurons=10-->10
         with tf.name_scope('layer_8'):
-            logits = layer.fully_connected(layer_7_dropout, 4096, self.num_classes,
+            logits = layer.fully_connected(layer_7_dropout, input_num=4096, output_num=self.num_classes,
                                            relu=False, name='logits')
 
         # 交叉熵损失函数
