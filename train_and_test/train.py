@@ -7,7 +7,7 @@ from data_preprocess.preprocessdata import PreprocessData
 
 
 def train_epoch(sess, net, train_data, train_labels, batch_size=128, valid_size=None,
-                file_writer=None, summary_operation=None, epoch_number=None):
+                file_writer=None, summary_operation=None, epoch_number=None, log=None):
     """
     使用一个128批次数量的样本并随机梯度下降训练我们的模型
     :param sess: 用于计算的会话
@@ -19,6 +19,7 @@ def train_epoch(sess, net, train_data, train_labels, batch_size=128, valid_size=
     :param file_writer: 日志文件写入对象
     :param summary_operation: 日志操作
     :param epoch_number: 训练周期数
+    :param log: 日志对象
     :return:
     """
     # 样本数量,定义验证集
@@ -38,7 +39,8 @@ def train_epoch(sess, net, train_data, train_labels, batch_size=128, valid_size=
     # 周期循环进行训练
     for epoch in range(1, epoch_number+1):
         # 每周期训练步骤等于总样本//批次大小
-        for step in range(0, num_example, batch_size):
+        # for step in range(0, num_example, batch_size):
+        for step in range(num_example//batch_size):
             end = step + batch_size
             # 获取批次训练数据
             batch_data, batch_labels = preprocess.batch_and_shuffle_data(train_data, train_labels, batch_size, queue)
@@ -74,6 +76,10 @@ def train_epoch(sess, net, train_data, train_labels, batch_size=128, valid_size=
                                                                                            loss,
                                                                                            batch_accuracy,
                                                                                            valid_accuracy))
+            # 用日志文件保存控制输出的值
+            if log is not None:
+                log.info("epoch：%s，step:%d/%d,loss:%.4f,  batch_accuracy:%.4f,  valid_accuracy:%.4f", epoch, step+1,
+                        num_example//batch_size, loss, batch_accuracy, valid_accuracy)
             print()
 
 

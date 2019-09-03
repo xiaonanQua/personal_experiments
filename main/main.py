@@ -58,7 +58,7 @@ with tf.compat.v1.Session() as sess:
     # 进行模型的训练
     train.train_epoch(sess, alexnet, train_data, train_labels, batch_size=cfg.batch_size,
                       file_writer=log_writer, summary_operation=summary_operation,
-                      epoch_number=cfg.epochs)
+                      epoch_number=cfg.epochs, log=cfg.log)
 
     # 保存模型
     train.save(sess, cfg.model_dir)

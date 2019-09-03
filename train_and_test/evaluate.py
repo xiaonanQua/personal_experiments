@@ -3,7 +3,7 @@
 import tensorflow as tf
 
 
-def evaluate(sess, net, train_data, train_labels, test_data, test_labels, model_dir):
+def evaluate(sess, net, train_data, train_labels, test_data, test_labels, model_dir, log=None):
     """
     对训练好的模型进行测试评估
     :param sess: 会话
@@ -13,6 +13,7 @@ def evaluate(sess, net, train_data, train_labels, test_data, test_labels, model_
     :param test_data: 测试数据
     :param test_labels: 测试标签
     :param model_dir: 模型保存的目录
+    :param log: 日志对象
     :return:
     """
     print('评估数据集...')
@@ -35,3 +36,6 @@ def evaluate(sess, net, train_data, train_labels, test_data, test_labels, model_
     print("训练精度:{:.3f}".format(train_accuracy))
     print("测试精度：{:.3f}".format(test_accuracy))
     print()
+
+    # 将输出数据保存到日志文件中
+    log.info('训练精度:%.3f, 测试精度：%.3f', train_accuracy, test_accuracy)

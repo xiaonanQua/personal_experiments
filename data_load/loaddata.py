@@ -1,16 +1,15 @@
 """
 实现各个数据集的加载
 """
-import config.config as cfg
+import config.alexnet_config as cfg
 import scipy.io as sio
 import os
 import gzip
 import pickle as pk
 import numpy as np
 import tensorflow as tf
-import data_preprocess.imageprocess as image_process
 
-cfg = cfg.Config()
+cfg = cfg.AlexNetConf()
 
 
 class LoadDataSet(object):
@@ -289,20 +288,14 @@ class LoadDataSet(object):
 
         return train_data, train_labels, test_data, test_labels
 
-if __name__ == '__main__':
-    # 实例化数据集,图像处理类
-    dataset = LoadDataSet()
-    image_process = image_process.ImageProcess()
 
-    train_data, train_labels = dataset.load_mnist_dataset(dataset.mnist_file_name[0],
-                                                          dataset.mnist_file_name[1])
-    test_data, test_labels = dataset.load_mnist_dataset(dataset.mnist_file_name[2],
-                                                        dataset.mnist_file_name[3],
-                                                        num_examples=10000)
-    print(train_data.shape, train_labels.shape)
-    print(test_data.shape, test_labels.shape)
-    image_process.show_image(test_data[0])
-    print(test_labels[0])
+if __name__ == '__main__':
+    data = LoadDataSet()
+
+    train_data, _,test_data, _ = data.load_cifar_10(cfg.cifar_10_dir, cfg.cifar_file_name['train'][0:2],
+                                             cfg.cifar_file_name['test'], test_range=64)
+    print(train_data.shape, test_data.shape)
+
 
 
 

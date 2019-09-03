@@ -41,12 +41,13 @@ class ImageProcess(object):
         print("进行图像大小的重塑...")
         # 获得样本数量,定义重塑图像列表
         num_examples = images.shape[0]
-        image_list = []
+        # 初始化重塑图像样本的形状
+        resize_images = np.zeros(shape=[num_examples, resize_shape[0], resize_shape[1], resize_shape[2]], dtype=np.uint8)
 
         # 循环迭代所有图像
-        for i in range(num_examples):
+        for index in range(num_examples):
             # 重塑制定形状的图片并附加到列表中
-            image = resize(images[i], output_shape=resize_shape)
-            image_list.append(image)
-            tool.view_bar("重塑图像大小", i+1, num_examples)
-        return np.array(image_list)
+            image = resize(images[index], output_shape=resize_shape)
+            resize_images[index] = image
+            tool.view_bar("重塑图像大小", index+1, num_examples)
+        return resize_images
