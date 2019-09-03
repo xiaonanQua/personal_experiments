@@ -250,11 +250,11 @@ class LoadDataSet(object):
 
                 # 使用上下文环境打开文件
                 with open(file_path, mode='rb') as file:
-                    batch_file = pk.load(file, encoding='latin1')
+                    batch_file = pk.load(file, encoding='bytes')
 
                 # 将获取的训练数据转化成形状为[样本数量，高度，宽度，颜色通道]的数据
-                images = batch_file['data'].reshape(len(batch_file['data']), 3, 32, 32).transpose(0, 3, 2, 1)
-                labels = batch_file['labels']
+                images = batch_file[b'data'].reshape(len(batch_file[b'data']), 3, 32, 32).transpose(0, 3, 2, 1)
+                labels = batch_file[b'labels']
 
                 # 将数据和标签附加进列表中
                 train_data.extend(images)
@@ -275,11 +275,11 @@ class LoadDataSet(object):
 
             # 使用上下文环境打开文件
             with open(file_path, mode='rb') as file:
-                batch_file = pk.load(file, encoding='latin1')
+                batch_file = pk.load(file, encoding='bytes')
 
             # 将获取的训练数据转化成形状为[样本数量，高度，宽度，颜色通道]的数据
-            test_data = batch_file['data'].reshape(len(batch_file['data']), 3, 32, 32).transpose(0, 3, 2, 1)
-            test_labels = batch_file['labels']
+            test_data = batch_file[b'data'].reshape(len(batch_file[b'data']), 3, 32, 32).transpose(0, 3, 2, 1)
+            test_labels = batch_file[b'labels']
 
             # 选取小范围的数据
             if test_range is not None:

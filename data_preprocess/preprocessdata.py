@@ -228,7 +228,7 @@ class PreprocessData(object):
             index_list = [x for x in range(batch_size)]
             # 使用numpy中随机洗牌函数对索引进行洗牌
             np.random.shuffle(index_list)
-            print("洗牌后的索引：{}".format(index_list))
+            # print("洗牌后的索引：{}".format(index_list))
             for index in index_list:
                 shuffle_batch_images.append(batch_images[index])
                 shuffle_batch_labels.append(batch_labels[index])

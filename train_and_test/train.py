@@ -4,10 +4,11 @@
 import tensorflow as tf
 from utils.queue_linked_list import QueueLink
 from data_preprocess.preprocessdata import PreprocessData
+import logging as log
 
 
 def train_epoch(sess, net, train_data, train_labels, batch_size=128, valid_size=None,
-                file_writer=None, summary_operation=None, epoch_number=None, log=None):
+                file_writer=None, summary_operation=None, epoch_number=None):
     """
     使用一个128批次数量的样本并随机梯度下降训练我们的模型
     :param sess: 用于计算的会话
@@ -19,11 +20,11 @@ def train_epoch(sess, net, train_data, train_labels, batch_size=128, valid_size=
     :param file_writer: 日志文件写入对象
     :param summary_operation: 日志操作
     :param epoch_number: 训练周期数
-    :param log: 日志对象
     :return:
     """
-    # 样本数量,定义验证集
-    num_example = len(train_data)
+    # 配置日志文件
+    log.basicConfig(filename='train_log.txt', level=log.INFO)
+    # 定义验证集
     valid_data, valid_labels = [], []
     # 实例化队列对象，用于批次数据的读取
     queue = QueueLink()
@@ -35,15 +36,21 @@ def train_epoch(sess, net, train_data, train_labels, batch_size=128, valid_size=
         train_data, train_labels, valid_data, valid_labels = preprocess.divide_valid_data(train_data,
                                                                                           train_labels,
                                                                                           valid_size)
+    # 样本数量
+    num_example = len(train_data)
     # print(train_data.shape, train_labels.shape, valid_data.shape, valid_labels.shape)
     # 周期循环进行训练
     for epoch in range(1, epoch_number+1):
         # 每周期训练步骤等于总样本//批次大小
         # for step in range(0, num_example, batch_size):
         for step in range(num_example//batch_size):
-            end = step + batch_size
+            # end = step + batch_size
             # 获取批次训练数据
-            batch_data, batch_labels = preprocess.batch_and_shuffle_data(train_data, train_labels, batch_size, queue)
+            batch_data, batch_labels = preprocess.batch_and_shuffle_data(images=train_data,
+                                                                         labels=train_labels,
+                                                                         batch_size=batch_size,
+                                                                         data_queue=queue,
+                                                                         shuffle=True)
             # batch_data, batch_labels = train_data[step:end], train_labels[step:end]
             # 进行训练并保存日志文件
             if file_writer is not None and summary_operation is not None:
@@ -70,16 +77,15 @@ def train_epoch(sess, net, train_data, train_labels, batch_size=128, valid_size=
                 valid_accuracy = None
 
             # 输出得到的值
-            print("epoch：{}，step:{}/{},loss:{},  batch_accuracy:{},  valid_accuracy:{}".format(epoch,
+            print("epoch：{}，step:{}/{},loss:{:.3f},  batch_accuracy:{:.3f},  valid_accuracy:{:.3}".format(epoch,
                                                                                            step+1,
                                                                                            num_example//batch_size,
                                                                                            loss,
                                                                                            batch_accuracy,
                                                                                            valid_accuracy))
             # 用日志文件保存控制输出的值
-            if log is not None:
-                log.info("epoch：%s，step:%d/%d,loss:%.4f,  batch_accuracy:%.4f,  valid_accuracy:%.4f", epoch, step+1,
-                        num_example//batch_size, loss, batch_accuracy, valid_accuracy)
+            log.info("epoch：%s，step:%d/%d,loss:%.4f,  batch_accuracy:%.4f,  valid_accuracy:%.4f", epoch, step+1,
+                     num_example//batch_size, loss, batch_accuracy, valid_accuracy)
             print()
 
 

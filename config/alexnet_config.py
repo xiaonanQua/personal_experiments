@@ -1,5 +1,4 @@
 from config.config import Config
-import logging as log
 
 
 class AlexNetConf(Config):
@@ -18,8 +17,6 @@ class AlexNetConf(Config):
         self.learning_rate = 0.001  # 原始是0.01
         self.momentum = 0.9
         self.keep_prob = 0.5
-        # 配置日志文件
-        log.basicConfig(filename=self.log_dir+'alexnet.log', level=log.INFO)
-        self.log = log
+
 
 

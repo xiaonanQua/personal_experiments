@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.pylab as lab
 import numpy as np
 from skimage.transform import resize
+import scipy.misc
 import utils.tools as tool
 
 
@@ -39,7 +40,7 @@ class ImageProcess(object):
         :return: 重塑后的图像数据,数组形式
         """
         print("进行图像大小的重塑...")
-        # 获得样本数量,定义重塑图像列表
+        # 获得样本数量
         num_examples = images.shape[0]
         # 初始化重塑图像样本的形状
         resize_images = np.zeros(shape=[num_examples, resize_shape[0], resize_shape[1], resize_shape[2]], dtype=np.uint8)
@@ -47,7 +48,8 @@ class ImageProcess(object):
         # 循环迭代所有图像
         for index in range(num_examples):
             # 重塑制定形状的图片并附加到列表中
-            image = resize(images[index], output_shape=resize_shape)
+            # image = resize(images[index], output_shape=resize_shape)
+            image = scipy.misc.imresize(images[index], size=resize_shape, interp='bicubic')
             resize_images[index] = image
             tool.view_bar("重塑图像大小", index+1, num_examples)
         return resize_images
