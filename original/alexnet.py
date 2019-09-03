@@ -124,6 +124,7 @@ class AlexNet:
         # Note: 2048*2=4096, One GPU runs the layer-parts at the top while the other runs the layer-parts at the bottom.
         with tf.name_scope('layer6'):
             pool5_shape = layer5_pool.get_shape().as_list()
+            print(pool5_shape)
             flattened_input_size = pool5_shape[1] * pool5_shape[2] * pool5_shape[3]
             layer6_fc = self.__fully_connected(input=tf.reshape(layer5_pool, shape=[-1, flattened_input_size]),
                                                inputs_count=flattened_input_size, outputs_count=4096, relu=True,

@@ -43,14 +43,14 @@ class Layers(object):
             activations = tf.nn.relu(preactivations, name='activations')
 
             # 将变量值(卷积核参数，偏置值参数)，未激活的卷积数据和激活后的卷积数据添加到日志中
-            with tf.name_scope('filter_summaries'):
-                self.variable_summaries(filters)
-            with tf.name_scope('biases_summaries'):
-                self.variable_summaries(biases)
-            with tf.name_scope('preactivation_histogram'):
-                tf.compat.v1.summary.histogram('preactivations', preactivations)
-            with tf.name_scope('activation_histogram'):
-                tf.compat.v1.summary.histogram('activations', activations)
+            # with tf.name_scope('filter_summaries'):
+            #     self.variable_summaries(filters)
+            # with tf.name_scope('biases_summaries'):
+            #     self.variable_summaries(biases)
+            # with tf.name_scope('preactivation_histogram'):
+            #     tf.compat.v1.summary.histogram('preactivations', preactivations)
+            # with tf.name_scope('activation_histogram'):
+            #     tf.compat.v1.summary.histogram('activations', activations)
 
             return activations
 
@@ -97,16 +97,17 @@ class Layers(object):
                 activations = tf.nn.relu(preactivations, name='activations')
 
             # 将参数变量、线性值、激活值添加到日志中，用于tensorboard查看
-            with tf.name_scope('weight_summaries'):
-                self.variable_summaries(weights)
-            with tf.name_scope('biases_summaries'):
-                self.variable_summaries(biases)
-            with tf.name_scope('preactivations_histogram'):
-                tf.compat.v1.summary.histogram('preactivations', preactivations)
+            # with tf.name_scope('weight_summaries'):
+            #     self.variable_summaries(weights)
+            # with tf.name_scope('biases_summaries'):
+            #     self.variable_summaries(biases)
+            # with tf.name_scope('preactivations_histogram'):
+            #     tf.compat.v1.summary.histogram('preactivations', preactivations)
+            # if relu:
+            #     with tf.name_scope('activation_histogram'):
+            #         tf.compat.v1.summary.histogram('activations', activations)
 
             if relu:
-                with tf.name_scope('activation_histogram'):
-                    tf.compat.v1.summary.histogram('activations', activations)
                 return activations
             else:
                 return preactivations

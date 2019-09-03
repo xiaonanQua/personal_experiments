@@ -9,9 +9,10 @@ class Config(object):
     配置实验参数
     """
     def __init__(self):
-        # 数据集根目录、项目根目录
+        # 数据集根目录、项目根目录、训练数据保存目录
         self.root_dataset = '/home/team/xiaonan/Dataset/'
         self.root_project = '/home/team/xiaonan/personal_experiments/'
+        self.root_data_save = '/home/team/xiaonan/data_save/'
 
         # cifar-10数据集目录、文件名称
         self.cifar_10_dir = self.root_dataset + 'cifar-10/'
@@ -28,22 +29,24 @@ class Config(object):
         self.mnist_file_name = ['train-images-idx3-ubyte.gz', 'train-labels-idx1-ubyte.gz',
                                 't10k-images-idx3-ubyte.gz', 't10k-labels-idx1-ubyte.gz']
 
-        # 数据保存根目录、模型保存目录、日志文件保存目录
-        self.data_save_dir = self.root_project + 'data_save/'
-        self.model_dir = self.data_save_dir + 'model/'
-        self.log_dir = self.data_save_dir + 'log/'
+        # 模型保存目录、日志文件保存目录、实验结果保存目录
+        self.model_dir = self.root_data_save + 'model_train/'
+        self.log_dir = self.root_data_save + 'log/'
+        self.results = self.root_data_save + 'results/'
 
         # 初始化文件夹
         self._init()
 
     def _init(self):
         # 若文件夹不存在，则创建
-        if os.path.exists(self.data_save_dir) is False:
-            os.mkdir(self.data_save_dir)
-        elif os.path.exists(self.model_dir) is False:
+        if os.path.exists(self.root_data_save) is False:
+            os.mkdir(self.root_data_save)
+        if os.path.exists(self.model_dir) is False:
             os.mkdir(self.model_dir)
-        elif not os.path.exists(self.log_dir):
+        if os.path.exists(self.log_dir) is False:
             os.mkdir(self.log_dir)
+        if os.path.exists(self.results) is False:
+            os.mkdir(self.results)
 
 
 if __name__ == '__main__':
