@@ -63,8 +63,10 @@ def train_epoch(sess, net, train_data, train_labels, batch_size=128, valid_size=
                                                             net.dropout_keep_prob: net.keep_prob})
 
             # 获得loss值和批次准确率
-            loss = sess.run(net.loss_operation, feed_dict={net.x: batch_data, net.y: batch_labels,
-                                                           net.dropout_keep_prob: 1.0})
+            batch_loss = sess.run(net.loss_operation, feed_dict={net.x: batch_data, net.y: batch_labels,
+                                                                 net.dropout_keep_prob: 1.0})
+            valid_loss = sess.run(net.loss_operation, feed_dict={net.x: valid_data, net.y: valid_labels,
+                                                                 net.dropout_keep_prob: 1.0})
             batch_accuracy = sess.run(net.accuracy_operation, feed_dict={net.x: batch_data,
                                                                          net.y: batch_labels,
                                                                          net.dropout_keep_prob: 1.0})
@@ -77,15 +79,17 @@ def train_epoch(sess, net, train_data, train_labels, batch_size=128, valid_size=
                 valid_accuracy = None
 
             # 输出得到的值
-            print("epoch：{}，step:{}/{},loss:{:.3f},  batch_accuracy:{:.3f},  valid_accuracy:{:.3}".format(epoch,
-                                                                                           step+1,
-                                                                                           num_example//batch_size,
-                                                                                           loss,
-                                                                                           batch_accuracy,
-                                                                                           valid_accuracy))
+            print("epoch：{}，step:{}/{},batch_loss:{:.3f}, valid_loss:{:.3f}, batch_accuracy:{:.3f},  "
+                  "valid_accuracy:{:.3}".format(epoch,
+                                                step+1,
+                                                num_example//batch_size,
+                                                batch_loss,
+                                                valid_loss,
+                                                batch_accuracy,
+                                                valid_accuracy))
             # 用日志文件保存控制输出的值
-            log.info("epoch：%s，step:%d/%d,loss:%.4f,  batch_accuracy:%.4f,  valid_accuracy:%.4f", epoch, step+1,
-                     num_example//batch_size, loss, batch_accuracy, valid_accuracy)
+            log.info("epoch：%s，step:%d/%d,batch_loss:%.4f, valid_loss:%.4f, batch_accuracy:%.4f,  valid_accuracy:%.4f", epoch, step+1,
+                     num_example//batch_size, batch_loss, valid_loss, batch_accuracy, valid_accuracy)
             print()
 
 

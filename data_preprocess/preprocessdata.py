@@ -39,6 +39,8 @@ class PreprocessData(object):
         :param images: 输入的图像数据
         :return:
         """
+        print()
+        print('对数据进行归一化处理...')
         # 获得图像矩阵中最小、最大值
         min_value = np.min(images)
         max_value = np.max(images)

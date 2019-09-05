@@ -30,14 +30,18 @@ train_data, train_labels, test_data, test_labels = data.load_cifar_10(file_dir=c
 # train_data, train_labels, test_data, test_labels = read_cifar_10(image_width=cfg.image_width,
 #                                                                  image_height=cfg.image_height)
 
-# # 将读取的训练数据转化成数组, 并和测试数据一起重塑图像大小
+# 将读取的训练数据转化成数组, 并和测试数据一起重塑图像大小
 train_data = image_process.image_resize(train_data, resize_shape=[cfg.image_height,
                                                                             cfg.image_width,
                                                                             cfg.image_channels])
 test_data = image_process.image_resize(test_data, resize_shape=[cfg.image_height,
                                                                 cfg.image_height,
                                                                 cfg.image_channels])
-# # 将标签列表转化成one-hot向量
+# # 对训练、测试数据进行数据归一化操作
+# train_data = preprocess.normalize(train_data)
+# test_data = preprocess.normalize(test_data)
+
+# 将标签列表转化成one-hot向量
 train_labels = preprocess.one_hot_encode(train_labels, num_classes=cfg.num_classes)
 test_labels = preprocess.one_hot_encode(test_labels, num_classes=cfg.num_classes)
 
